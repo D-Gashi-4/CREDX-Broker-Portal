@@ -17,7 +17,7 @@
     redemptionFee: 'Confirmed in DIP',
     valuationFee: 'TBC, paid by borrower',
     legalFees: 'TBC, paid by borrower',
-    submitEmail: 'dg@credx.co.uk',
+    submitEmail: 'info@credx.co.uk',
     forms: { application: 'assets/forms/CredX_Application_Form.pdf', sal: 'assets/forms/CredX_Statement_of_Assets_and_Liabilities.docx' },
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = CONFIG;
