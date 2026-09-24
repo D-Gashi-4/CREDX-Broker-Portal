@@ -1,24 +1,22 @@
-# CredX Broker Portal
+# CODING AGENTS: READ THIS FIRST
 
-A static web page for brokers. They structure a bridging deal, see a live Indicative Quote, submit it to CredX by email, and download the client forms. It's built from the Claude Design file `CredX Broker Portal v2.dc.html`.
+This is a **handoff bundle** from Claude Design (claude.ai/design).
 
-It needs no build step or server. Open `index.html` in a browser, or host the folder on any static host.
+A user mocked up designs in HTML/CSS/JS using an AI design tool, then exported this bundle so a coding agent can implement the designs for real.
 
-## Hosting
+## What you should do — IMPORTANT
 
-The portal is hosted on Vercel (project `credx-broker-portal`), which is linked to this repo. Every push to `main` redeploys it automatically. It needs no build settings.
+**Read `credx-broker-portal-built/project/CredX Broker Portal v2.dc.html` in full.** The user had this file open when they triggered the handoff, so it's almost certainly the primary design they want built. Read it top to bottom — don't skim. Then **follow its imports**: open every file it pulls in (shared components, CSS, scripts) so you understand how the pieces fit together before you start implementing.
 
-## Files
+**If anything is ambiguous, ask the user to confirm before you start implementing.** It's much cheaper to clarify scope up front than to build the wrong thing.
 
-- `js/config.js`: all pricing and settings (rate, fees, LTV limits, loan size limits, terms, submission email, form links). This is the only file to edit for pricing changes.
-- `js/calc.js`: the pure deal maths, criteria checks, documents list and plain-text quote. It has no page code.
-- `js/app.js`: page state, input handling and actions.
-- `css/portal.css`: styles, including the A4 print layout used by "Download Indicative Quote (PDF)".
-- `assets/`: the logo and the two client forms.
-- `assets/fonts/`: Encode Sans Semi Condensed (headings and buttons). It's self-hosted and limited to the Latin character set and the two weights used (400 and 600), about 47 KB in total. Its licence is in `OFL.txt`.
+## About the design files
 
-Broker details and whether the "How to use" guide is hidden are remembered in the browser between visits. Deal details aren't saved.
+The design medium is **HTML/CSS/JS** — these are prototypes, not production code. Your job is to **recreate them pixel-perfectly** in whatever technology makes sense for the target codebase (React, Vue, native, whatever fits). Match the visual output; don't copy the prototype's internal structure unless it happens to fit.
 
-## Tests
+**Don't render these files in a browser or take screenshots unless the user asks you to.** Everything you need — dimensions, colors, layout rules — is spelled out in the source. Read the HTML and CSS directly; a screenshot won't tell you anything they don't.
 
-Open `test/calc.test.html` in a browser. It covers the spec case (net £200,000, 12 months, broker fee on, £400,000 security gives gross £245,725.61 at 61.43% LTV, or £225,134.08 over 6 months). It also covers purchase price vs market value, 2nd-charge LTV, Maximise loan, the LTV bands, submission blockers, the two-stage documents list (auction, tenanted, leasehold, 2nd charge and company borrowers) and the reference format.
+## Bundle contents
+
+- `credx-broker-portal-built/README.md` — this file
+- `credx-broker-portal-built/project/` — the `CredX Broker Portal Built` project files (HTML prototypes, assets, components)

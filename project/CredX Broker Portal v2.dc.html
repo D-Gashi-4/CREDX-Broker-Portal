@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>CredX Broker Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Encode+Sans+Semi+Condensed:wght@400;500;600;700&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-title" content="CredX Brokers">
+<style>
+html,body{margin:0;padding:0;background:#fff;color:#000;-webkit-tap-highlight-color:rgba(0,129,137,.12)}
+button,a,label{touch-action:manipulation}
+input,textarea{-webkit-appearance:none;appearance:none}
+input[type=checkbox]{-webkit-appearance:auto;appearance:auto}
+@media (max-width:640px){input,textarea,select{font-size:16px !important}}
+html{scroll-padding-top:16px}
+body{font-family:Aptos,"Segoe UI",Calibri,sans-serif;font-variant-numeric:tabular-nums;-webkit-text-size-adjust:100%}
+*{box-sizing:border-box}
+a{color:#008189;text-decoration:underline;text-underline-offset:2px}
+a:hover{color:#193243;text-decoration-thickness:2px}
+input,textarea,select{font-family:inherit;font-variant-numeric:tabular-nums}
+button,h1,h2,h3{font-family:"Encode Sans Semi Condensed",Aptos,"Segoe UI",Calibri,sans-serif;font-variant-numeric:tabular-nums}
+input[type=checkbox]{accent-color:#008189}
+@media print{
+  @page{size:A4;margin:14mm}
+  [data-noprint]{display:none !important}
+  [data-grid]{display:block !important}
+  [data-quote]{border:none !important;padding:0 !important}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</helmet>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#193243"></rect><text x="50" y="60" text-anchor="middle" font-family="Segoe UI,sans-serif" font-size="28" fill="#fff">CDX</text></svg></template>
+<div style="min-height:100vh;display:flex;flex-direction:column;font-size:15px;line-height:1.45">
+
+<header data-noprint="1" style="background:#fff;box-shadow:0 2px 18px rgba(0,0,0,.08);position:relative;z-index:20">
+  <div style="max-width:1280px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) max(clamp(16px,4vw,40px),env(safe-area-inset-right)) 18px max(clamp(16px,4vw,40px),env(safe-area-inset-left));display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <img src="assets/credx-logo.svg" alt="CredX" style="height:clamp(44px,9vw,111px);width:auto;max-width:100%;display:block">
+      <span style="width:1px;height:clamp(30px,6vw,77px);background:#193243"></span>
+      <span style="letter-spacing: .08em; text-transform: uppercase; white-space:nowrap;font-size:clamp(16px,3.2vw,36px)">Broker Portal</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <sc-if value="{{ isExample }}" hint-placeholder-val="{{ true }}">
+        <span style="flex:none;white-space:nowrap;border:1.5px solid #193243;color:#193243;border-radius:999px;font-weight:600;padding:6px 14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase">Example deal</span>
+      </sc-if>
+      <sc-if value="{{ notExample }}" hint-placeholder-val="{{ false }}">
+        <button onClick="{{ onLoadExample }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 14px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap" style-hover="text-decoration:underline">Load example deal</button>
+      </sc-if>
+      <button onClick="{{ onClear }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 14px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap" style-hover="text-decoration:underline">Start new deal</button>
+      <button onClick="{{ onToggleGuide }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 14px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap" style-hover="text-decoration:underline">{{ guideToggleLabel }}</button>
+    </div>
+  </div>
+</header>
+
+<main style="flex:1;width:100%;max-width:1280px;margin:0 auto;padding:32px clamp(16px,4vw,40px) 56px;display:flex;flex-direction:column;gap:56px">
+
+  <div data-noprint="1" style="display:flex;flex-direction:column;gap:12px;background:#1a1a1a;color:#fff;border-radius:28px;padding:clamp(28px,5vw,56px)">
+    <h1 style="margin:0;color:#fff;font-size:clamp(30px,5vw,48px);font-weight:600;letter-spacing:-.01em;line-height:1.15">Structure a bridging deal</h1>
+    <p style="margin:0;max-width:720px;color:#e6e6e6;font-size:17px;line-height:1.6;text-wrap:pretty">Enter the deal to generate a live Indicative Quote, then submit it to CredX with your commentary. CredX provides unregulated principal bridging finance only.</p>
+  </div>
+
+  <sc-if value="{{ isExample }}" hint-placeholder-val="{{ true }}">
+    <div data-noprint="1" style="border:1.5px solid #008189;border-radius:20px;padding:20px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px 24px">
+      <div style="display:flex;flex-direction:column;gap:4px;max-width:720px;flex:1 1 320px;min-width:0">
+        <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#008189">You are viewing an example deal</span>
+        <span style="min-width:0;text-wrap:pretty">The form is filled with a sample deal so you can see how the portal works: a £200,000 net refinance over 12 months, secured on one property worth £400,000. Change any figure to watch the Indicative Quote update. When you are ready, start a new deal to clear the example and enter your own.</span>
+      </div>
+      <button onClick="{{ onClear }}" style="border-radius:999px;white-space:nowrap;flex:none;flex:none;height:44px;padding:0 18px;border:1px solid #008189;background:#008189;color:#fff;font-weight:600;font-size:15px;cursor:pointer;white-space:nowrap" style-hover="text-decoration:underline">Clear example and start my deal</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ notExample }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="border:1px solid #dfe3e6;border-radius:20px;padding:16px 24px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px">
+      <span style="flex:1 1 320px;min-width:0;color:#444">Not sure where to start? Load the example deal to see a completed quote, then start a new deal when you are ready.</span>
+      <button onClick="{{ onLoadExample }}" style="border-radius:999px;white-space:nowrap;flex:none;flex:none;height:40px;padding:0 16px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap" style-hover="text-decoration:underline">Load example deal</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ hideGuide }}" hint-placeholder-val="{{ false }}">
+    <div data-noprint="1" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;border-top:1px solid #000;padding-top:12px">
+      <span style="flex:1 1 260px;min-width:0;color:#444">Need a reminder of the steps?</span>
+      <button onClick="{{ onToggleGuide }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 18px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:14px;cursor:pointer" style-hover="text-decoration:underline">Show how to use the portal</button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ showGuide }}" hint-placeholder-val="{{ true }}">
+    <section data-noprint="1" style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px;border-top:1px solid #000;padding-top:12px">
+        <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">How to use the portal</h2>
+        <button onClick="{{ onToggleGuide }}" style="border-radius:999px;white-space:nowrap;flex:none;flex:none;white-space:nowrap;height:44px;padding:0 12px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:13px;cursor:pointer" style-hover="text-decoration:underline">Hide guide</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:0 28px">
+        <sc-for list="{{ guide }}" as="g" hint-placeholder-count="7">
+          <a href="{{ g.href }}" style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid #e0e0e0;color:#000;text-decoration:none" style-hover="text-decoration:underline">
+            <span style="flex:none;font-size:13px;font-weight:600;color:#008189;margin-top:1px">{{ g.num }}</span>
+            <span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font-weight:600">{{ g.title }}</span><span style="font-size:13px;color:#444;text-wrap:pretty">{{ g.text }}</span></span>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </sc-if>
+
+  <div data-grid="1" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,500px),1fr));gap:48px;align-items:start">
+
+    <div data-noprint="1" style="display:flex;flex-direction:column;gap:48px;min-width:0">
+
+      <!-- 1 BROKER -->
+      <section id="step1" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+          <span style="font-size:13px;color:#008189;font-weight:600">01</span>
+          <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Broker details</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:16px 20px">
+          <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Name</span><input value="{{ broker.name }}" onChange="{{ on.bName }}" autocomplete="name" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Firm</span><input value="{{ broker.firm }}" onChange="{{ on.bFirm }}" autocomplete="organization" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Email</span><input type="email" value="{{ broker.email }}" onChange="{{ on.bEmail }}" autocomplete="email" autoCapitalize="none" spellCheck="false" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Phone</span><input type="tel" value="{{ broker.phone }}" onChange="{{ on.bPhone }}" autocomplete="tel" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+          <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">FCA number (optional)</span><input value="{{ broker.fca }}" onChange="{{ on.bFca }}" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+        </div>
+      </section>
+
+      <!-- 2 BORROWER -->
+      <section id="step2" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+          <span style="font-size:13px;color:#008189;font-weight:600">02</span>
+          <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Borrower</h2>
+        </div>
+        <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Borrower name</span><input value="{{ borrower.name }}" onChange="{{ on.brName }}" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Borrower type</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ segs.btype }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Loan purpose</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ segs.purpose }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+          </div>
+          <sc-if value="{{ isPurchase }}" hint-placeholder-val="{{ false }}">
+            <label style="display:flex;gap:12px;align-items:center;cursor:pointer;margin-top:6px">
+              <input type="checkbox" checked="{{ borrower.auction }}" onChange="{{ on.auction }}" style="width:20px;height:20px;margin:0;flex:none">
+              <span>Purchase at auction</span>
+            </label>
+          </sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Exit strategy</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            <sc-for list="{{ segs.exit }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for>
+          </div>
+          <textarea value="{{ borrower.exitDetail }}" onChange="{{ on.exitDetail }}" rows="3" placeholder="Exit detail (required): how and when the loan will be repaid" style="width:100%;margin-top:6px;padding:10px 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;line-height:1.45;background:#fff;color:#000;outline:none;resize:vertical" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></textarea>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px;border-top:1px solid #c8c8c8;padding-top:16px">
+          <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
+            <input type="checkbox" checked="{{ borrower.occupancy }}" onChange="{{ on.occupancy }}" style="width:20px;height:20px;margin:1px 0 0;flex:none">
+            <span style="display:flex;flex-direction:column;gap:4px"><span>No borrower or person related to the borrower occupies, has occupied, or will occupy any security property.</span><span style="font-size:13px;color:#444">Required. CredX only does unregulated lending; submission is blocked until this is confirmed.</span></span>
+          </label>
+          <label style="display:flex;gap:12px;align-items:flex-start;cursor:pointer">
+            <input type="checkbox" checked="{{ borrower.works }}" onChange="{{ on.works }}" style="width:20px;height:20px;margin:1px 0 0;flex:none">
+            <span>Loan request includes refurbishment or build costs</span>
+          </label>
+          <sc-if value="{{ borrower.works }}" hint-placeholder-val="{{ false }}">
+            <div style="border:2px solid #C62828;color:#C62828;border-radius:14px;padding:12px 18px;display:flex;gap:14px;align-items:baseline">
+              <span style="font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase">Flag</span>
+              <span style="font-weight:600">CredX does not fund works. Acquisition only.</span>
+            </div>
+          </sc-if>
+        </div>
+      </section>
+
+      <!-- 3 SECURITIES -->
+      <section id="step3" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+          <span style="font-size:13px;color:#008189;font-weight:600">03</span>
+          <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Securities</h2>
+        </div>
+        <sc-for list="{{ secs }}" as="s" hint-placeholder-count="1">
+          <div style="display:flex;flex-direction:column;gap:16px;border:1px solid #dfe3e6;border-radius:20px;box-shadow:0 8px 28px rgba(25,50,67,.07);padding:20px">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+              <span style="font-weight:600">Security {{ s.num }}</span>
+              <sc-if value="{{ s.canRemove }}" hint-placeholder-val="{{ false }}">
+                <button onClick="{{ s.remove }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 12px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:13px;cursor:pointer" style-hover="text-decoration:underline">Remove</button>
+              </sc-if>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px 20px">
+              <label style="display:flex;flex-direction:column;gap:6px;min-width:0;grid-column:1/-1"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Address</span><input value="{{ s.address }}" onChange="{{ s.onAddress }}" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+              <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Postcode</span><input value="{{ s.postcode }}" autoCapitalize="characters" autocomplete="postal-code" onChange="{{ s.onPostcode }}" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none;text-transform:uppercase" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Property type</span>
+              <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ s.typeOpts }}" as="o" hint-placeholder-count="4"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:16px 28px">
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Tenure</span>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ s.tenureOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Tenanted</span>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ s.tenantedOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Charge position</span>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ s.chargeOpts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px 20px">
+              <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Market value</span><span style="display:flex;align-items:center;border:1px solid #b9c2c8;border-radius:10px;overflow:hidden;height:44px"><span style="padding:0 0 0 12px">£</span><input inputMode="decimal" enterKeyHint="next" value="{{ s.mv }}" onChange="{{ s.onMv }}" onBlur="{{ s.onMvBlur }}" placeholder="0.00" style="flex:1;min-width:0;height:42px;padding:0 12px 0 6px;border:none;font-size:15px;background:#fff;color:#000;outline:none"></span></label>
+              <sc-if value="{{ s.showPP }}" hint-placeholder-val="{{ false }}">
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Purchase price</span><span style="display:flex;align-items:center;border:1px solid #b9c2c8;border-radius:10px;overflow:hidden;height:44px"><span style="padding:0 0 0 12px">£</span><input inputMode="decimal" enterKeyHint="next" value="{{ s.pp }}" onChange="{{ s.onPp }}" onBlur="{{ s.onPpBlur }}" placeholder="0.00" style="flex:1;min-width:0;height:42px;padding:0 12px 0 6px;border:none;font-size:15px;background:#fff;color:#000;outline:none"></span></label>
+              </sc-if>
+            </div>
+            <sc-if value="{{ s.isSecond }}" hint-placeholder-val="{{ false }}">
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:16px 20px">
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Existing first charge lender</span><input value="{{ s.firstLender }}" onChange="{{ s.onFirstLender }}" style="width:100%;height:44px;padding:0 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;background:#fff;color:#000;outline:none" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></label>
+                <label style="display:flex;flex-direction:column;gap:6px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Outstanding balance</span><span style="display:flex;align-items:center;border:1px solid #b9c2c8;border-radius:10px;overflow:hidden;height:44px"><span style="padding:0 0 0 12px">£</span><input inputMode="decimal" enterKeyHint="next" value="{{ s.firstBalance }}" onChange="{{ s.onFirstBalance }}" onBlur="{{ s.onFirstBalanceBlur }}" placeholder="0.00" style="flex:1;min-width:0;height:42px;padding:0 12px 0 6px;border:none;font-size:15px;background:#fff;color:#000;outline:none"></span></label>
+              </div>
+            </sc-if>
+            <div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid #c8c8c8;padding-top:12px;font-size:14px">
+              <span style="color:#444">{{ s.ltvBasis }}</span>
+              <span style="font-weight:600">{{ s.ltvValueFmt }}</span>
+            </div>
+          </div>
+        </sc-for>
+        <div>
+          <button onClick="{{ onAddSecurity }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 18px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:15px;cursor:pointer" style-hover="text-decoration:underline">+ Add security</button>
+        </div>
+      </section>
+
+      <!-- 4 STRUCTURE -->
+      <section id="step4" style="display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+          <span style="font-size:13px;color:#008189;font-weight:600">04</span>
+          <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Structure the deal</h2>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end">
+          <label style="display:flex;flex-direction:column;gap:6px;flex:1 1 240px;min-width:0"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Net advance required</span><span style="display:flex;align-items:center;border:1px solid #b9c2c8;border-radius:10px;overflow:hidden;height:44px"><span style="padding:0 0 0 12px">£</span><input inputMode="decimal" enterKeyHint="next" value="{{ netRaw }}" onChange="{{ onNet }}" onBlur="{{ onNetBlur }}" placeholder="0.00" style="flex:1;min-width:0;height:42px;padding:0 12px 0 6px;border:none;font-size:15px;background:#fff;color:#000;outline:none"></span></label>
+          <button onClick="{{ onMax }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 18px;border:1px solid #008189;background:#008189;color:#fff;font-weight:600;font-size:15px;cursor:pointer" style-hover="text-decoration:underline">Maximise loan</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Term</span>
+          <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ segs.term }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="border-radius:999px;white-space:nowrap;flex:none;min-height:44px;padding:0 18px;border:1px solid #008189;border-radius:999px;font-size:14px;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }}">{{ o.label }}</button></sc-for></div>
+          <span style="font-size:13px;color:#444">{{ termNote }}</span>
+        </div>
+        <label style="display:flex;gap:12px;align-items:center;cursor:pointer">
+          <input type="checkbox" checked="{{ brokerOn }}" onChange="{{ onBrokerToggle }}" style="width:20px;height:20px;margin:0;flex:none">
+          <span>{{ brokerFeeLabel }}</span>
+        </label>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));border-top:1px solid #000;border-bottom:1px solid #000">
+          <div style="padding:14px 12px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Gross loan</span><span style="font-size:19px;font-weight:600">{{ res.gross }}</span></div>
+          <div style="padding:14px 12px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">Net advance</span><span style="font-size:19px;font-weight:600">{{ res.net }}</span></div>
+          <div style="padding:14px 12px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">LTV</span><span style="font-size:19px;font-weight:600;color:{{ res.ltvColor }}">{{ res.ltv }}</span></div>
+          <div style="padding:14px 12px 14px 0;display:flex;flex-direction:column;gap:4px"><span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">{{ res.maxLabel }}</span><span style="font-size:19px;font-weight:600">{{ res.maxNet }}</span></div>
+        </div>
+        <sc-if value="{{ res.hasMsg }}" hint-placeholder-val="{{ false }}"><span style="font-size:13px">{{ res.msg }}</span></sc-if>
+      </section>
+    </div>
+
+    <!-- 5 INDICATIVE QUOTE -->
+    <section id="step5" style="display:flex;flex-direction:column;gap:16px;min-width:0">
+      <div data-noprint="1" style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+        <span style="font-size:13px;color:#008189;font-weight:600">05</span>
+        <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Indicative Quote</h2>
+        <span style="margin-left:auto;font-size:12px;color:#444">Updates as you type</span>
+      </div>
+      <article data-quote="1" style="border:1px solid #dfe3e6;border-radius:20px;box-shadow:0 8px 28px rgba(25,50,67,.07);padding:clamp(18px,3vw,32px);display:flex;flex-direction:column;gap:24px;background:#fff">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <img src="assets/credx-logo.svg" alt="CredX" style="height:22px;width:auto;display:block;align-self:flex-start">
+            <h3 style="margin:10px 0 0;font-size:24px;font-weight:600;color:#193243;letter-spacing:-.01em">Indicative Quote</h3>
+          </div>
+          <div style="display:grid;grid-template-columns:auto auto;gap:2px 14px;font-size:13px">
+            <span style="color:#444">Reference</span><span style="font-weight:600;text-align:right;white-space:nowrap">{{ q.ref }}</span>
+            <span style="color:#444">Date</span><span style="text-align:right;white-space:nowrap">{{ q.date }}</span>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:12px 20px;border-top:1px solid #000;padding-top:14px;font-size:14px">
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">Borrower</span><span style="font-weight:600">{{ q.borrower }}</span><span style="color:#444">{{ q.borrowerType }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">Purpose</span><span>{{ q.purpose }}</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">Exit</span><span>{{ q.exit }}</span></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column">
+          <div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #000;padding-bottom:6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444"><span>Securities</span><span style="white-space:nowrap">Value for LTV</span></div>
+          <sc-for list="{{ q.secRows }}" as="r" hint-placeholder-count="1">
+            <div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid #c8c8c8;font-size:14px">
+              <div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                <span style="font-weight:600;overflow-wrap:anywhere">{{ r.address }}</span>
+                <span style="color:#444">{{ r.detail }}</span>
+                <sc-if value="{{ r.hasPrior }}" hint-placeholder-val="{{ false }}"><span style="color:#444">{{ r.prior }}</span></sc-if>
+              </div>
+              <span style="white-space:nowrap">{{ r.value }}</span>
+            </div>
+          </sc-for>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;font-size:14px"><span>Total security value</span><span style="font-weight:600">{{ q.totalValue }}</span></div>
+          <sc-if value="{{ q.hasPrior }}" hint-placeholder-val="{{ false }}"><div style="display:flex;justify-content:space-between;gap:12px;padding:0 0 8px;font-size:14px"><span>Total prior charges</span><span>{{ q.prior }}</span></div></sc-if>
+        </div>
+
+        <div style="display:flex;flex-direction:column;font-size:14px">
+          <div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid #000;border-bottom:1px solid #000;padding:10px 0;font-size:16px;font-weight:600"><span>Gross loan</span><span>{{ q.gross }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e0e0e0"><span>Less arrangement fee ({{ q.arrPct }})</span><span>{{ q.arr }}</span></div>
+          <sc-if value="{{ q.hasBroker }}" hint-placeholder-val="{{ true }}"><div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e0e0e0"><span>Less broker fee ({{ q.brkPct }})</span><span>{{ q.brk }}</span></div></sc-if>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #e0e0e0"><span>Less retained interest ({{ q.intBasis }})</span><span>{{ q.int }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid #000"><span>Less loan setup fee</span><span>{{ q.setup }}</span></div>
+          <div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:3px double #000;font-size:16px;font-weight:600"><span>Net advance</span><span>{{ q.net }}</span></div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:minmax(0,1fr) auto;gap:0;font-size:14px">
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Interest rate</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.rate }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Term</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.term }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Minimum interest period</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.minInt }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">LTV (gross facility plus prior charges)</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right;font-weight:600;color:{{ q.ltvColor }}">{{ q.ltv }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Application fee (paid upfront, non-refundable, not deducted)</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.appFee }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Redemption fee</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.redemption }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Valuation fee</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.valuation }}</span>
+          <span style="padding:6px 12px 6px 0;border-bottom:1px solid #e0e0e0;color:#444">Lender legal fees</span><span style="padding:6px 0;border-bottom:1px solid #e0e0e0;text-align:right">{{ q.legal }}</span>
+        </div>
+
+        <div style="display:flex;flex-direction:column">
+          <div style="border-bottom:1px solid #000;padding-bottom:6px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">Criteria checks</div>
+          <sc-for list="{{ criteria }}" as="c" hint-placeholder-count="5">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid #e0e0e0;font-size:14px">
+              <span style="display:flex;flex-direction:column;min-width:0"><span>{{ c.label }}</span><span style="font-size:12px;color:{{ c.detailColor }}">{{ c.detail }}</span></span>
+              <sc-if value="{{ c.pass }}" hint-placeholder-val="{{ true }}"><span style="min-width:52px;text-align:center;font-size:12px;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border:1px solid #c8c8c8">Pass</span></sc-if>
+              <sc-if value="{{ c.amber }}" hint-placeholder-val="{{ false }}"><span style="min-width:52px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border:2px solid #B45309;color:#B45309">Refer</span></sc-if><sc-if value="{{ c.flag }}" hint-placeholder-val="{{ false }}"><span style="min-width:52px;text-align:center;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border:2px solid #C62828;color:#C62828">Flag</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;flex-direction:column;gap:4px;border-bottom:1px solid #000;padding-bottom:6px">
+            <span style="font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#444">Documents</span>
+            <span style="font-size:13px;color:#444">Suggested documents. CredX may request further information at its discretion.</span>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span style="font-size:13px;font-weight:600">Stage 1: needed to review the deal</span>
+            <sc-for list="{{ docs1 }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px">
+              <span style="flex:none;width:8px;border-top:1px solid #000;margin-top:.72em"></span>
+              <span style="display:flex;flex-direction:column;min-width:0"><span style="text-wrap:pretty">{{ d.text }}</span><span style="font-size:12px;color:#444">{{ d.why }}</span></span>
+            </div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid #e0e0e0;padding-top:12px">
+            <span style="font-size:13px;font-weight:600">Stage 2: needed before completion</span>
+            <sc-for list="{{ docs2 }}" as="d" hint-placeholder-count="4">
+            <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px">
+              <span style="flex:none;width:8px;border-top:1px solid #000;margin-top:.72em"></span>
+              <span style="display:flex;flex-direction:column;min-width:0"><span style="text-wrap:pretty">{{ d.text }}</span><span style="font-size:12px;color:#444">{{ d.why }}</span></span>
+            </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <p style="margin:0;border-top:1px solid #000;padding-top:12px;font-size:11.5px;line-height:1.5;color:#333;text-wrap:pretty">Indicative only. This is not an offer of finance or a Decision in Principle. All lending is subject to underwriting, valuation, legal due diligence and CredX credit approval. CredX provides unregulated bridging finance only. CredX Ltd, Company No. 16640225. Registered Office: Suite F16 St George's Business Park, Castle Road, Sittingbourne, Kent ME10 3TB.</p>
+      </article>
+      <div data-noprint="1" style="display:flex;flex-wrap:wrap;gap:10px">
+        <button onClick="{{ onPrint }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 18px;border:1px solid #008189;background:#008189;color:#fff;font-weight:600;font-size:15px;cursor:pointer" style-hover="text-decoration:underline">Download Indicative Quote (PDF)</button>
+        <button onClick="{{ onCopySummary }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 18px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:15px;cursor:pointer" style-hover="text-decoration:underline">{{ copyLabels.summary }}</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 6 PROPOSE -->
+  <section id="step6" data-noprint="1" style="display:flex;flex-direction:column;gap:20px;max-width:860px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+      <span style="font-size:13px;color:#008189;font-weight:600">06</span>
+      <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Propose deal to CredX</h2>
+    </div>
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span style="font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#444">{{ commentaryLabel }}</span>
+      <textarea value="{{ commentary }}" onChange="{{ onCommentary }}" rows="6" placeholder="Background to the deal, borrower profile, and your case for any flagged criteria." style="width:100%;padding:10px 12px;border:1px solid #b9c2c8;border-radius:10px;font-size:15px;line-height:1.45;background:#fff;color:#000;outline:none;resize:vertical" style-focus="border-color:#008189;box-shadow:0 0 0 3px rgba(0,129,137,.18)"></textarea>
+    </label>
+    <sc-if value="{{ hasBlockers }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:6px;border:1.5px solid #193243;border-radius:14px;padding:14px 18px">
+        <span style="font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase">Before you can submit</span>
+        <sc-for list="{{ blockers }}" as="b" hint-placeholder-count="2">
+          <div style="display:flex;gap:10px;align-items:flex-start;font-size:14px"><span style="flex:none;width:8px;border-top:1px solid #000;margin-top:.72em"></span><span>{{ b.text }}</span></div>
+        </sc-for>
+      </div>
+    </sc-if>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">
+      <button onClick="{{ onSubmit }}" disabled="{{ submitDisabled }}" style="border-radius:999px;white-space:nowrap;flex:none;height:48px;padding:0 24px;border:1px solid #008189;background:#008189;color:#fff;font-weight:600;font-size:16px;font-weight:600;cursor:pointer;opacity:{{ submitOpacity }}" style-hover="text-decoration:underline">Submit to CredX</button>
+      <button onClick="{{ onCopySubmission }}" style="border-radius:999px;white-space:nowrap;flex:none;height:48px;padding:0 18px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:15px;cursor:pointer" style-hover="text-decoration:underline">{{ copyLabels.submission }}</button>
+    </div>
+    <sc-if value="{{ submitted }}" hint-placeholder-val="{{ false }}">
+      <p style="margin:0;border-top:1px solid #000;border-bottom:1px solid #000;padding:12px 0;font-weight:600">Your email is ready to send. CredX will review the deal and, if suitable, issue a formal DIP.</p>
+    </sc-if>
+    <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;font-size:14px">
+      <span style="color:#444">Submissions go to</span>
+      <span style="user-select:all;font-weight:600;font-size:15px">dg@credx.co.uk</span>
+      <button onClick="{{ onCopyEmail }}" style="border-radius:999px;white-space:nowrap;flex:none;height:44px;padding:0 12px;border:1.5px solid #008189;background:#fff;color:#008189;font-weight:600;font-size:13px;cursor:pointer" style-hover="text-decoration:underline">{{ copyLabels.email }}</button>
+      <span style="color:#444;flex-basis:100%">If your email client does not open, copy the submission and paste it into an email to this address.</span>
+    </div>
+  </section>
+
+  <!-- 7 FORMS -->
+  <section id="step7" data-noprint="1" style="display:flex;flex-direction:column;gap:20px;max-width:860px">
+    <div style="display:flex;align-items:baseline;gap:14px;border-top:1px solid #000;padding-top:12px">
+      <span style="font-size:13px;color:#008189;font-weight:600">07</span>
+      <h2 style="margin:0;flex:none;white-space:nowrap;color:#193243;font-size:17px;font-weight:600;letter-spacing:.06em;text-transform:uppercase">Client forms</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:16px">
+      <div style="border:1px solid #dfe3e6;border-radius:20px;box-shadow:0 8px 28px rgba(25,50,67,.07);padding:24px;display:flex;flex-direction:column;gap:16px;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:600">CredX Application Form</span><span style="font-size:13px;color:#444">PDF</span></div>
+        <a href="{{ forms.application }}" download="" style="align-self:flex-start;display:inline-flex;align-items:center;height:40px;padding:0 16px;border:1px solid #008189;background:#008189;color:#fff;border-radius:999px;font-weight:600;text-decoration:none;font-size:14px" style-hover="text-decoration:underline">Download</a>
+      </div>
+      <div style="border:1px solid #dfe3e6;border-radius:20px;box-shadow:0 8px 28px rgba(25,50,67,.07);padding:24px;display:flex;flex-direction:column;gap:16px;justify-content:space-between">
+        <div style="display:flex;flex-direction:column;gap:4px"><span style="font-size:17px;font-weight:600">Statement of Assets and Liabilities</span><span style="font-size:13px;color:#444">Word document (DOCX)</span></div>
+        <a href="{{ forms.sal }}" download="" style="align-self:flex-start;display:inline-flex;align-items:center;height:40px;padding:0 16px;border:1px solid #008189;background:#008189;color:#fff;border-radius:999px;font-weight:600;text-decoration:none;font-size:14px" style-hover="text-decoration:underline">Download</a>
+      </div>
+    </div>
+    <p style="margin:0;font-size:14px;color:#444">Download, have your client complete, and return to dg@credx.co.uk with the deal reference.</p>
+  </section>
+</main>
+
+<footer data-noprint="1" style="background:#1a1a1a;color:#fff">
+  <div style="max-width:1280px;margin:0 auto;padding:20px max(clamp(16px,4vw,40px),env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(clamp(16px,4vw,40px),env(safe-area-inset-left));display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;font-size:13px">
+    <span>CredX Ltd, Suite 013 Regus, Victory Way, Crossways, Dartford, Kent DA2 6QD.</span>
+    <a href="mailto:dg@credx.co.uk" style="color:#fff">dg@credx.co.uk</a>
+  </div>
+</footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  // ===== CredX pricing and settings: edit here =====
+  static CONFIG = {
+    ratePA: 0.14,              // minimum pricing: simple interest per annum on gross, retained for full term
+    arrangementPct: 0.02,      // of gross, deducted
+    brokerPct: 0.01,           // of gross, deducted when broker fee is on
+    setupFee: 1495,            // deducted
+    applicationFee: 495,       // paid upfront by borrower, non-refundable, not deducted
+    maxLTV: 0.70,              // standard max, on gross facility plus prior charges (Maximise loan uses this)
+    hardLTV: 0.75,             // above maxLTV up to this shows orange; above this shows red and blocks submission
+    amberColor: '#B45309',
+    redColor: '#C62828',
+    minGross: 30000,
+    maxGross: 750000,
+    terms: [{ months: 6, minInterest: 3 }, { months: 12, minInterest: 6 }],
+    defaultTerm: 12,
+    redemptionFee: 'Confirmed in DIP',
+    valuationFee: 'TBC, paid by borrower',
+    legalFees: 'TBC, paid by borrower',
+    submitEmail: 'dg@credx.co.uk',
+    forms: { application: 'assets/forms/CredX_Application_Form.pdf', sal: 'assets/forms/CredX_Statement_of_Assets_and_Liabilities.docx' },
+  };
+
+  blankSec(id) { return { id, address: '', postcode: '', type: 'Residential', tenure: 'Freehold', tenanted: 'No', mv: '', pp: '', charge: '1st', firstLender: '', firstBalance: '' }; }
+  blankDeal() {
+    return {
+      borrower: { name: '', type: '', purpose: '', exitType: '', exitDetail: '', occupancy: false, works: false, auction: false },
+      secs: [this.blankSec(1)], nextId: 2, net: '', term: Component.CONFIG.defaultTerm, brokerOn: true,
+      commentary: '', ref: this.makeRef(), submitted: false, isExample: false,
+    };
+  }
+  exampleDeal() {
+    return {
+      ...this.blankDeal(),
+      borrower: { name: 'Example Holdings Ltd', type: 'UK Limited Company', purpose: 'Refinance', exitType: 'Refinance', exitDetail: 'Refinance onto a buy-to-let term loan within 12 months.', occupancy: true, works: false, auction: false },
+      secs: [{ ...this.blankSec(1), address: '1 Example Street, London', postcode: 'SW1A 1AA', mv: '400,000.00' }],
+      net: '200,000.00', term: 12, brokerOn: true, isExample: true,
+    };
+  }
+  makeRef() {
+    const d = new Date(), p = n => String(n).padStart(2, '0');
+    const abc = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let x = ''; for (let i = 0; i < 4; i++) x += abc[Math.floor(Math.random() * abc.length)];
+    return `CDX-IQ-${String(d.getFullYear()).slice(2)}${p(d.getMonth() + 1)}${p(d.getDate())}-${x}`;
+  }
+
+  state = { showGuide: true, broker: { name: '', firm: '', email: '', phone: '', fca: '' }, copied: '', ...this.exampleDeal() };
+
+  num(s) { const n = parseFloat(String(s ?? '').replace(/[^0-9.]/g, '')); return isFinite(n) ? n : 0; }
+  r2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
+  gbp(n) { return '£' + (n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  plain(n) { return n.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  pct(n) { return (n * 100).toFixed(2) + '%'; }
+  upd(fn) { this.setState(s => ({ ...fn(s), isExample: false, submitted: false })); }
+
+  calc() {
+    const C = Component.CONFIG, s = this.state;
+    const termObj = C.terms.find(t => t.months === s.term) || C.terms[0];
+    const bp = s.brokerOn ? C.brokerPct : 0;
+    const df = 1 - C.arrangementPct - bp - C.ratePA * termObj.months / 12;
+    const netIn = this.num(s.net), hasNet = netIn > 0;
+    const gross = hasNet ? this.r2((netIn + C.setupFee) / df) : 0;
+    const arr = this.r2(gross * C.arrangementPct), brk = this.r2(gross * bp);
+    const int = this.r2(gross * C.ratePA * termObj.months / 12);
+    const setup = hasNet ? C.setupFee : 0;
+    const net = this.r2(gross - arr - brk - int - setup);
+    const isPurchase = s.borrower.purpose === 'Purchase';
+    const secs = s.secs.map(x => {
+      const mv = this.num(x.mv), pp = isPurchase ? this.num(x.pp) : 0;
+      const ltvValue = pp > 0 ? Math.min(pp, mv) : mv;
+      const prior = x.charge === '2nd' ? this.num(x.firstBalance) : 0;
+      return { ...x, mvN: mv, ppN: pp, ltvValue, prior, basis: pp > 0 ? (pp <= mv ? 'purchase price' : 'market value') : 'market value' };
+    });
+    const totalValue = secs.reduce((a, x) => a + x.ltvValue, 0);
+    const prior = secs.reduce((a, x) => a + x.prior, 0);
+    const ltv = totalValue > 0 && hasNet ? (gross + prior) / totalValue : null;
+    const maxGrossLTV = C.maxLTV * totalValue - prior;
+    const maxGross = Math.min(maxGrossLTV, C.maxGross);
+    const maxNet = totalValue > 0 ? Math.floor(maxGross * df - C.setupFee) : 0;
+    return { C, termObj, bp, df, hasNet, gross, arr, brk, int, setup, net, secs, totalValue, prior, ltv, maxNet, isPurchase, maxGrossLTV };
+  }
+
+  criteria(k) {
+    const { C } = k, b = this.state.borrower;
+    const ltvOk = k.ltv !== null && k.ltv <= C.maxLTV + 1e-9;
+    const ltvAmber = k.ltv !== null && !ltvOk && k.ltv <= C.hardLTV + 1e-9;
+    const ltvDetail = k.ltv === null ? 'Not calculated' : ltvOk ? this.pct(k.ltv)
+      : ltvAmber ? `${this.pct(k.ltv)}. Above ${Math.round(C.maxLTV * 100)}% standard, within ${Math.round(C.hardLTV * 100)}% limit`
+      : `${this.pct(k.ltv)}. Above ${Math.round(C.hardLTV * 100)}% maximum`;
+    const grossOk = k.hasNet && k.gross >= C.minGross && k.gross <= C.maxGross;
+    const exitOk = !!b.exitType && b.exitDetail.trim().length > 0;
+    return [
+      { label: `LTV at or below ${Math.round(C.maxLTV * 100)}%`, detail: ltvDetail, ok: ltvOk, level: ltvOk ? 'pass' : ltvAmber ? 'amber' : 'flag' },
+      { label: `Gross loan between ${this.gbp(C.minGross)} and ${this.gbp(C.maxGross)}`, detail: k.hasNet ? this.gbp(k.gross) : 'Not calculated', ok: grossOk },
+      { label: 'Occupancy declaration given', detail: b.occupancy ? 'Given' : 'Not given', ok: b.occupancy },
+      { label: 'No works funding requested', detail: b.works ? 'Works requested. CredX does not fund works.' : 'Acquisition only', ok: !b.works },
+      { label: 'Exit strategy provided', detail: exitOk ? b.exitType : 'Exit type and detail required', ok: exitOk },
+    ];
+  }
+
+  docs(k) {
+    const b = this.state.borrower, secs = k.secs, has = f => secs.some(f);
+    const s1 = [], s2 = [], add = (arr, why, items) => items.forEach(t => arr.push({ text: t, why }));
+    add(s1, 'All deals', ['Completed Application Form', 'Statement of Assets and Liabilities', 'Exit strategy detail']);
+    if (b.purpose === 'Purchase') add(s1, 'Purpose: Purchase', ['Memorandum of sale or accepted offer', 'Proof of deposit and its source']);
+    if (b.purpose === 'Purchase' && b.auction) add(s1, 'Purchase at auction', ['Auction legal pack', 'Completion deadline']);
+    if (b.purpose === 'Refinance') add(s1, 'Purpose: Refinance', ['Redemption statement from the existing lender']);
+    if (has(x => x.charge === '2nd')) add(s1, '2nd charge security', ['Latest first charge mortgage statement']);
+    if (b.exitType === 'Refinance') add(s1, 'Exit: Refinance', ['Exit lender AIP or broker outline of the refinance']);
+    if (b.exitType === 'Sale') add(s1, 'Exit: Sale', ['Agent marketing appraisal or comparable sales']);
+    add(s2, 'All individuals, directors and 25%+ shareholders', ['Certified photo ID', 'Two certified proofs of address dated within 3 months']);
+    if (b.type === 'UK Limited Company' || b.type === 'SPV') add(s2, 'Borrower: ' + b.type, ['Certificate of incorporation', 'Shareholder structure chart', 'Latest accounts or management accounts', 'Personal guarantees from directors']);
+    if (has(x => x.type === 'Residential')) add(s2, 'Residential security', ['EPC rated E or above', 'Gas safety certificate']);
+    if (has(x => x.type === 'Commercial' || x.type === 'Mixed use')) add(s2, 'Commercial or mixed use security', ['Fire risk assessment', 'Asbestos report']);
+    if (has(x => x.tenure === 'Leasehold')) add(s2, 'Leasehold security', ['Copy of lease showing remaining term']);
+    if (has(x => x.tenanted === 'Yes')) add(s2, 'Tenanted security', ['Tenancy agreement or lease', 'Rent schedule']);
+    if (has(x => x.charge === '2nd')) add(s2, '2nd charge security', ['First charge lender consent (CredX solicitors will request)']);
+    add(s2, 'Valuation', ['Desktop in the first instance, full RICS inspection at CredX discretion, surveyor fee paid by borrower']);
+    return { s1, s2 };
+  }
+
+  quoteText(k, full) {
+    const s = this.state, b = s.borrower, C = k.C, L = [];
+    const dt = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+    L.push('CREDX INDICATIVE QUOTE', `Reference: ${s.ref}`, `Date: ${dt}`, '');
+    if (full) {
+      const r = s.broker;
+      L.push('BROKER', `Name: ${r.name}`, `Firm: ${r.firm}`, `Email: ${r.email}`, `Phone: ${r.phone}`, `FCA number: ${r.fca || 'Not provided'}`, '');
+    }
+    L.push('BORROWER', `Name: ${b.name || 'Not entered'}`, `Type: ${b.type || 'Not selected'}`, `Loan purpose: ${b.purpose || 'Not selected'}`,
+      `Exit strategy: ${b.exitType || 'Not selected'}${b.exitDetail.trim() ? '. ' + b.exitDetail.trim() : ''}`,
+      `Occupancy declaration: ${b.occupancy ? 'Given' : 'NOT GIVEN'}`, `Refurbishment or build costs requested: ${b.works ? 'Yes' : 'No'}`, '');
+    L.push('SECURITIES');
+    k.secs.forEach((x, i) => {
+      L.push(`${i + 1}. ${x.address || 'Address not entered'}${x.postcode ? ', ' + x.postcode.toUpperCase() : ''}`);
+      L.push(`   ${x.type}, ${x.tenure}, ${x.charge} charge`);
+      L.push(`   Market value ${this.gbp(x.mvN)}${k.isPurchase && x.ppN > 0 ? '; Purchase price ' + this.gbp(x.ppN) : ''}; Value for LTV ${this.gbp(x.ltvValue)}`);
+      if (x.charge === '2nd') L.push(`   Existing first charge: ${x.firstLender || 'Lender not entered'}, balance ${this.gbp(x.prior)}`);
+    });
+    L.push(`Total security value: ${this.gbp(k.totalValue)}`);
+    if (k.prior > 0) L.push(`Total prior charges: ${this.gbp(k.prior)}`);
+    L.push('', 'FIGURES', `Gross loan: ${this.gbp(k.gross)}`, `Arrangement fee (${this.pct(C.arrangementPct)}): ${this.gbp(k.arr)}`);
+    if (s.brokerOn) L.push(`Broker fee (${this.pct(C.brokerPct)}): ${this.gbp(k.brk)}`);
+    L.push(`Retained interest (${this.pct(C.ratePA)} p.a., ${k.termObj.months} months): ${this.gbp(k.int)}`, `Loan setup fee: ${this.gbp(k.setup)}`,
+      `Net advance: ${this.gbp(k.net)}`, `Interest rate: ${this.pct(C.ratePA)} per annum, simple, retained`, `Term: ${k.termObj.months} months`,
+      `Minimum interest period: ${k.termObj.minInterest} months`, `LTV: ${k.ltv === null ? 'Not calculated' : this.pct(k.ltv)}`,
+      `Application fee: ${this.gbp(C.applicationFee)} (paid upfront, non-refundable, not deducted)`, `Redemption fee: ${C.redemptionFee}`,
+      `Valuation fee: ${C.valuationFee}`, `Lender legal fees: ${C.legalFees}`, '', 'CRITERIA CHECKS');
+    this.criteria(k).forEach(c => L.push(`- ${c.label}: ${c.ok ? 'Pass' : c.level === 'amber' ? 'Refer, OUTSIDE STANDARD CRITERIA' : 'Flag, OUTSIDE STANDARD CRITERIA'} (${c.detail})`));
+    { const D = this.docs(k); L.push('', 'DOCUMENTS', 'Suggested documents. CredX may request further information at its discretion.', '', 'Stage 1: needed to review the deal');
+      D.s1.forEach(d => L.push(`[ ] ${d.text} (${d.why})`)); L.push('', 'Stage 2: needed before completion'); D.s2.forEach(d => L.push(`[ ] ${d.text} (${d.why})`)); }
+    if (full) L.push('', 'BROKER COMMENTARY', s.commentary.trim() || 'None provided');
+    L.push('', 'Indicative only. This is not an offer of finance or a Decision in Principle. All lending is subject to underwriting, valuation, legal due diligence and CredX credit approval. CredX provides unregulated bridging finance only. CredX Ltd, Company No. 16640225.');
+    return L.join('\n');
+  }
+
+  copy(text, key) {
+    const done = () => { this.setState({ copied: key }); clearTimeout(this._t); this._t = setTimeout(() => this.setState({ copied: '' }), 1800); };
+    const fallback = () => { const t = document.createElement('textarea'); t.value = text; t.style.position = 'fixed'; t.style.opacity = '0'; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove(); done(); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+  }
+
+  seg(options, current, pick) {
+    return options.map(o => { const v = typeof o === 'object' ? o.value : o, l = typeof o === 'object' ? o.label : o, on = v === current;
+      return { label: l, pick: () => pick(v), bg: on ? '#008189' : '#fff', fg: on ? '#fff' : '#193243' }; });
+  }
+
+  renderVals() {
+    const s = this.state, k = this.calc(), C = k.C;
+    const b = (key) => e => { const v = e.target.value; this.upd(st => ({ broker: { ...st.broker, [key]: v } })); };
+    const br = (key, isCheck) => e => { const v = isCheck ? e.target.checked : e.target.value; this.upd(st => ({ borrower: { ...st.borrower, [key]: v } })); };
+    const brPick = key => v => this.upd(st => ({ borrower: { ...st.borrower, [key]: v } }));
+    const setSec = (id, patch) => this.upd(st => ({ secs: st.secs.map(x => x.id === id ? { ...x, ...patch } : x) }));
+    const secIn = (id, key) => e => setSec(id, { [key]: e.target.value });
+    const secBlur = (id, key) => e => { const raw = e.target.value; if (String(raw).trim() === '') return; setSec(id, { [key]: this.plain(this.num(raw)) }); };
+
+    const secs = k.secs.map((x, i) => ({
+      ...x, num: i + 1, canRemove: s.secs.length > 1, showPP: k.isPurchase, isSecond: x.charge === '2nd',
+      remove: () => this.upd(st => ({ secs: st.secs.filter(y => y.id !== x.id) })),
+      onAddress: secIn(x.id, 'address'), onPostcode: secIn(x.id, 'postcode'),
+      onMv: secIn(x.id, 'mv'), onMvBlur: secBlur(x.id, 'mv'), onPp: secIn(x.id, 'pp'), onPpBlur: secBlur(x.id, 'pp'),
+      onFirstLender: secIn(x.id, 'firstLender'), onFirstBalance: secIn(x.id, 'firstBalance'), onFirstBalanceBlur: secBlur(x.id, 'firstBalance'),
+      typeOpts: this.seg(['Residential', 'Commercial', 'Mixed use', 'Land'], x.type, v => setSec(x.id, { type: v })),
+      tenantedOpts: this.seg(['Yes', 'No'], x.tenanted, v => setSec(x.id, { tenanted: v })),
+      tenureOpts: this.seg(['Freehold', 'Leasehold'], x.tenure, v => setSec(x.id, { tenure: v })),
+      chargeOpts: this.seg([{ value: '1st', label: '1st charge' }, { value: '2nd', label: '2nd charge' }], x.charge, v => setSec(x.id, { charge: v })),
+      ltvBasis: `Value used for LTV (lower of purchase price and market value)`.replace(/ \(.*\)/, k.isPurchase ? ' (lower of purchase price and market value)' : ' (market value)'),
+      ltvValueFmt: this.gbp(x.ltvValue),
+    }));
+
+    const crit = this.criteria(k);
+    const anyFlag = crit.some(c => !c.ok);
+    const r = s.broker, bw = s.borrower;
+    const blockers = [];
+    if (!bw.occupancy) blockers.push('Tick the occupancy declaration. CredX only does unregulated lending.');
+    if (!r.name.trim() || !r.firm.trim() || !r.email.trim() || !r.phone.trim()) blockers.push('Complete your broker details: name, firm, email and phone.');
+    if (!bw.name.trim()) blockers.push('Enter the borrower name.');
+    if (!bw.exitType || !bw.exitDetail.trim()) blockers.push('Select an exit strategy and give the exit detail.');
+    if (!k.secs.some(x => x.address.trim() && x.ltvValue > 0)) blockers.push('Enter at least one security with an address and value.');
+    if (!k.hasNet) blockers.push('Enter the net advance required.');
+    if (k.ltv !== null && k.ltv > C.hardLTV + 1e-9) blockers.push(`Reduce the loan. LTV is above the ${Math.round(C.hardLTV * 100)}% maximum.`);
+    if (anyFlag && !s.commentary.trim()) blockers.push('Add broker commentary. It is required when any criteria check shows Flag.');
+
+    const dash = '-';
+    const ltvColor = k.ltv === null || k.ltv <= C.maxLTV + 1e-9 ? '#000' : k.ltv <= C.hardLTV + 1e-9 ? C.amberColor : C.redColor;
+    const g = v => k.hasNet ? this.gbp(v) : dash;
+    const firstAddr = (k.secs[0] && k.secs[0].address.trim()) || 'Address not entered';
+
+    return {
+      broker: s.broker, borrower: s.borrower,
+      isExample: s.isExample, notExample: !s.isExample,
+      showGuide: s.showGuide, hideGuide: !s.showGuide, guideToggleLabel: s.showGuide ? 'Hide guide' : 'How to use',
+      onToggleGuide: () => this.setState(st => ({ showGuide: !st.showGuide })),
+      guide: [
+        ['Your details', 'Name, firm, email and phone. These go on the submission to CredX.'],
+        ['Borrower', 'Type, purpose and exit, with exit detail. Tick the occupancy declaration: CredX only does unregulated lending.'],
+        ['Securities', 'Add each property. LTV uses the lower of purchase price and market value. Add first charge details for any 2nd charge.'],
+        ['Structure the deal', 'Enter the net advance and term, or press Maximise loan for the most available at 70% LTV.'],
+        ['Check the quote', 'The Indicative Quote updates as you type. Criteria show Pass, Refer (orange) or Flag (red).'],
+        ['Submit to CredX', 'Add commentary (required if anything is outside criteria) and press Submit to open a pre-filled email.'],
+        ['Client forms', 'Download the Application Form and Statement of Assets and Liabilities for your client to complete.'],
+      ].map(([title, text], i) => ({ num: String(i + 1).padStart(2, '0'), title, text, href: '#step' + (i + 1) })),
+      onClear: () => this.setState({ ...this.blankDeal(), copied: '' }),
+      onLoadExample: () => this.setState({ ...this.exampleDeal(), copied: '' }),
+      on: {
+        bName: b('name'), bFirm: b('firm'), bEmail: b('email'), bPhone: b('phone'), bFca: b('fca'),
+        brName: br('name'), exitDetail: br('exitDetail'), occupancy: br('occupancy', true), works: br('works', true), auction: br('auction', true),
+      },
+      segs: {
+        btype: this.seg(['Individual', 'UK Limited Company', 'SPV', 'Other'], bw.type, brPick('type')),
+        purpose: this.seg(['Purchase', 'Refinance', 'Capital raise', 'Other'], bw.purpose, brPick('purpose')),
+        exit: this.seg(['Sale', 'Refinance', 'Other'], bw.exitType, brPick('exitType')),
+        term: this.seg(C.terms.map(t => ({ value: t.months, label: `${t.months} months` })), s.term, v => this.upd(() => ({ term: v }))),
+      },
+      secs,
+      onAddSecurity: () => this.upd(st => ({ secs: [...st.secs, this.blankSec(st.nextId)], nextId: st.nextId + 1 })),
+      netRaw: s.net,
+      onNet: e => { const v = e.target.value; this.upd(() => ({ net: v })); },
+      onNetBlur: e => { const raw = e.target.value; if (String(raw).trim() === '') return; this.setState({ net: this.plain(this.num(raw)) }); },
+      onMax: () => { if (k.maxNet > 0) this.upd(() => ({ net: this.plain(k.maxNet) })); },
+      termNote: `Minimum ${k.termObj.minInterest} months interest. Interest retained for the full term.`,
+      brokerOn: s.brokerOn,
+      onBrokerToggle: e => { const v = e.target.checked; this.upd(() => ({ brokerOn: v })); },
+      brokerFeeLabel: `Include broker fee (${this.pct(C.brokerPct)} of gross, deducted)`,
+      res: {
+        gross: g(k.gross), net: g(k.net), ltv: k.ltv === null ? dash : this.pct(k.ltv), ltvColor,
+        maxLabel: k.maxGrossLTV > C.maxGross ? `Max net (gross cap)` : `Max net at ${Math.round(C.maxLTV * 100)}% LTV`,
+        maxNet: k.maxNet > 0 ? this.gbp(k.maxNet) : dash,
+        hasMsg: k.totalValue > 0 && k.maxNet <= 0,
+        msg: 'Security value is not sufficient for a loan at the maximum LTV after prior charges.',
+      },
+      q: {
+        ref: s.ref, date: new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }),
+        borrower: bw.name || 'Not entered', borrowerType: bw.type || 'Type not selected', purpose: bw.purpose || 'Not selected',
+        exit: bw.exitType ? bw.exitType : 'Not selected',
+        secRows: k.secs.map(x => ({
+          address: (x.address || 'Address not entered') + (x.postcode ? ', ' + x.postcode.toUpperCase() : ''),
+          detail: `${x.type}, ${x.tenure}, ${x.charge} charge. Valued on ${x.basis}.`,
+          hasPrior: x.charge === '2nd', prior: `Prior charge: ${x.firstLender || 'lender not entered'}, ${this.gbp(x.prior)}`,
+          value: this.gbp(x.ltvValue),
+        })),
+        totalValue: this.gbp(k.totalValue), hasPrior: k.prior > 0, prior: this.gbp(k.prior),
+        gross: g(k.gross), arr: g(k.arr), brk: g(k.brk), int: g(k.int), setup: g(k.setup), net: g(k.net),
+        arrPct: `${this.pct(C.arrangementPct)} of gross`, brkPct: `${this.pct(C.brokerPct)} of gross`, hasBroker: s.brokerOn,
+        intBasis: `${this.pct(C.ratePA)} p.a. x ${k.termObj.months} months`,
+        rate: `${this.pct(C.ratePA)} p.a. minimum pricing, simple, retained`, term: `${k.termObj.months} months`, minInt: `${k.termObj.minInterest} months`,
+        ltv: k.ltv === null ? dash : `${this.pct(k.ltv)} (standard max ${Math.round(C.maxLTV * 100)}%)`, ltvColor,
+        appFee: this.gbp(C.applicationFee), redemption: C.redemptionFee, valuation: C.valuationFee, legal: C.legalFees,
+      },
+      criteria: crit.map(c => ({ label: c.label, detail: c.detail, pass: c.ok, amber: c.level === 'amber', flag: !c.ok && c.level !== 'amber', detailColor: c.level === 'amber' ? C.amberColor : c.level === 'flag' ? C.redColor : '#444' })),
+      docs1: this.docs(k).s1, docs2: this.docs(k).s2, isPurchase: k.isPurchase,
+      onPrint: () => { const t = document.title; document.title = `CredX Indicative Quote ${s.ref}`; window.print(); setTimeout(() => { document.title = t; }, 500); },
+      onCopySummary: () => this.copy(this.quoteText(k, false), 'summary'),
+      copyLabels: {
+        summary: s.copied === 'summary' ? 'Copied' : 'Copy summary',
+        submission: s.copied === 'submission' ? 'Copied' : 'Copy submission',
+        email: s.copied === 'email' ? 'Copied' : 'Copy address',
+      },
+      commentary: s.commentary,
+      onCommentary: e => { const v = e.target.value; this.setState({ commentary: v, submitted: false }); },
+      commentaryLabel: anyFlag ? 'Broker commentary (required: criteria flagged)' : 'Broker commentary',
+      blockers: blockers.map(t => ({ text: t })), hasBlockers: blockers.length > 0,
+      submitDisabled: blockers.length > 0, submitOpacity: blockers.length > 0 ? 0.35 : 1,
+      onSubmit: () => {
+        if (blockers.length) return;
+        const subject = `Broker submission | ${firstAddr} | Gross ${this.gbp(k.gross)}`;
+        const a = document.createElement('a');
+        a.href = `mailto:${C.submitEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(this.quoteText(k, true))}`;
+        document.body.appendChild(a); a.click(); a.remove();
+        this.setState({ submitted: true });
+      },
+      onCopySubmission: () => this.copy(`To: ${C.submitEmail}\nSubject: Broker submission | ${firstAddr} | Gross ${this.gbp(k.gross)}\n\n` + this.quoteText(k, true), 'submission'),
+      onCopyEmail: () => this.copy(C.submitEmail, 'email'),
+      submitted: s.submitted,
+      forms: C.forms,
+    };
+  }
+}
+</script>
+</body>
+</html>
