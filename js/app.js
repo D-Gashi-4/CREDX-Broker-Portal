@@ -305,6 +305,29 @@
   $('formApp').href = C.forms.application; $('formSal').href = C.forms.sal;
   document.querySelectorAll('.max-ltv-text').forEach(function (el) { el.textContent = X.whole(C.maxLTV); });
 
+  // ----- light / dark mode -----
+  // No saved choice: follow the device setting. Clicking the toggle saves an explicit choice.
+  var THEME_KEY = 'credx.theme', root = document.documentElement;
+  var darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function savedTheme() { try { var t = localStorage.getItem(THEME_KEY); return t === 'light' || t === 'dark' ? t : null; } catch (e) { return null; } }
+  function currentTheme() { return root.getAttribute('data-theme') || savedTheme() || (darkQuery && darkQuery.matches ? 'dark' : 'light'); }
+  function renderTheme() {
+    var dark = currentTheme() === 'dark';
+    text('themeLabel', dark ? 'Light mode' : 'Dark mode');
+    $('themeToggle').setAttribute('aria-pressed', String(dark));
+    $('themeToggle').setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    $('themeToggle').querySelector('.icon-moon').style.display = dark ? 'none' : '';
+    $('themeToggle').querySelector('.icon-sun').style.display = dark ? '' : 'none';
+  }
+  $('themeToggle').addEventListener('click', function () {
+    var next = currentTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next);
+    try { localStorage.setItem(THEME_KEY, next); } catch (e) { /* storage unavailable: still switches for this visit */ }
+    renderTheme();
+  });
+  if (darkQuery && darkQuery.addEventListener) darkQuery.addEventListener('change', function () { if (!root.getAttribute('data-theme')) renderTheme(); });
+  renderTheme();
+
   syncInputs();
   render();
 })();
