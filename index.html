@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CredX Broker Portal</title>
+<link rel="icon" href="assets/credx-logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/portal.css">
+</head>
+<body>
+<div class="page">
+
+<header class="site-header" data-noprint>
+  <div class="wrap">
+    <div class="brand">
+      <img src="assets/credx-logo.svg" alt="CredX">
+      <span class="divider" aria-hidden="true"></span>
+      <span class="title">Broker Portal</span>
+    </div>
+    <div class="header-actions">
+      <span class="tag" id="exampleTag">Example deal</span>
+      <button type="button" class="btn btn-sm" id="loadExample">Load example</button>
+      <button type="button" class="btn btn-sm" id="clearDeal">Clear</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="intro" data-noprint>
+    <h1>Structure a bridging deal</h1>
+    <p>Enter the deal to generate a live Indicative Quote, then submit it to CredX with your commentary. CredX provides unregulated principal bridging finance only.</p>
+  </div>
+
+  <div class="main-grid">
+
+    <div class="col" data-noprint>
+
+      <!-- 1 BROKER -->
+      <section class="block" aria-labelledby="h-broker">
+        <div class="sec-head"><span class="n">01</span><h2 id="h-broker">Broker details</h2></div>
+        <div class="fields">
+          <label class="field"><span class="lbl">Name</span><input class="input" data-bind="broker.name" autocomplete="name"></label>
+          <label class="field"><span class="lbl">Firm</span><input class="input" data-bind="broker.firm" autocomplete="organization"></label>
+          <label class="field"><span class="lbl">Email</span><input class="input" type="email" data-bind="broker.email" autocomplete="email"></label>
+          <label class="field"><span class="lbl">Phone</span><input class="input" type="tel" data-bind="broker.phone" autocomplete="tel"></label>
+          <label class="field"><span class="lbl">FCA number (optional)</span><input class="input" data-bind="broker.fca"></label>
+        </div>
+      </section>
+
+      <!-- 2 BORROWER -->
+      <section class="block" aria-labelledby="h-borrower">
+        <div class="sec-head"><span class="n">02</span><h2 id="h-borrower">Borrower</h2></div>
+        <label class="field"><span class="lbl">Borrower name</span><input class="input" data-bind="borrower.name"></label>
+        <div class="field" role="group" aria-labelledby="l-btype">
+          <span class="lbl" id="l-btype">Borrower type</span>
+          <div class="seg" data-seg="btype"></div>
+        </div>
+        <div class="field" role="group" aria-labelledby="l-purpose">
+          <span class="lbl" id="l-purpose">Loan purpose</span>
+          <div class="seg" data-seg="purpose"></div>
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-exit">Exit strategy</span>
+          <div class="seg" data-seg="exit" role="group" aria-labelledby="l-exit"></div>
+          <textarea class="textarea" data-bind="borrower.exitDetail" rows="3" style="margin-top:6px" aria-label="Exit detail" placeholder="Exit detail (required): how and when the loan will be repaid"></textarea>
+        </div>
+        <div class="checks">
+          <label class="check">
+            <input type="checkbox" data-bind="borrower.occupancy">
+            <span class="stack"><span>No borrower or person related to the borrower occupies, has occupied, or will occupy any security property.</span><span class="note">Required. CredX only does unregulated lending; submission is blocked until this is confirmed.</span></span>
+          </label>
+          <label class="check">
+            <input type="checkbox" data-bind="borrower.works">
+            <span>Loan request includes refurbishment or build costs</span>
+          </label>
+          <div class="flagbox" id="worksFlag" role="alert">
+            <span class="k">Flag</span>
+            <span class="v">CredX does not fund works. Acquisition only.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3 SECURITIES -->
+      <section class="block" aria-labelledby="h-secs">
+        <div class="sec-head"><span class="n">03</span><h2 id="h-secs">Securities</h2></div>
+        <div id="secList" style="display:flex;flex-direction:column;gap:20px"></div>
+        <div><button type="button" class="btn" id="addSec">+ Add security</button></div>
+      </section>
+
+      <!-- 4 STRUCTURE -->
+      <section class="block" aria-labelledby="h-structure">
+        <div class="sec-head"><span class="n">04</span><h2 id="h-structure">Structure the deal</h2></div>
+        <div class="net-row">
+          <label class="field"><span class="lbl">Net advance required</span><span class="money"><span>£</span><input inputmode="decimal" data-bind="net" data-money placeholder="0.00"></span></label>
+          <button type="button" class="btn btn-primary" id="maximise">Maximise loan</button>
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-term">Term</span>
+          <div class="seg" data-seg="term" role="group" aria-labelledby="l-term"></div>
+          <span class="note" id="termNote"></span>
+        </div>
+        <label class="check center">
+          <input type="checkbox" data-bind="brokerOn">
+          <span id="brokerFeeLabel"></span>
+        </label>
+        <div class="stats" aria-live="polite">
+          <div class="stat"><span class="lbl">Gross loan</span><b id="rGross"></b></div>
+          <div class="stat"><span class="lbl">Net advance</span><b id="rNet"></b></div>
+          <div class="stat"><span class="lbl">LTV</span><b id="rLtv"></b></div>
+          <div class="stat"><span class="lbl" id="rMaxLabel"></span><b id="rMax"></b></div>
+        </div>
+        <span class="note" id="rMsg" style="color:var(--ink)">Security value is not sufficient for a loan at the maximum LTV after prior charges.</span>
+      </section>
+    </div>
+
+    <!-- 5 INDICATIVE QUOTE -->
+    <section class="block quote-block" aria-labelledby="h-quote">
+      <div class="sec-head" data-noprint><span class="n">05</span><h2 id="h-quote">Indicative Quote</h2><span class="aside">Updates as you type</span></div>
+      <article class="quote">
+        <div class="q-head">
+          <div class="logo">
+            <img src="assets/credx-logo.svg" alt="CredX">
+            <h3>Indicative Quote</h3>
+          </div>
+          <div class="q-meta">
+            <span>Reference</span><span class="strong" id="qRef"></span>
+            <span>Date</span><span id="qDate"></span>
+          </div>
+        </div>
+
+        <div class="q-parties">
+          <div><span class="cap">Borrower</span><span class="strong" id="qBorrower"></span><span class="muted" id="qBorrowerType"></span></div>
+          <div><span class="cap">Purpose</span><span id="qPurpose"></span></div>
+          <div><span class="cap">Exit</span><span id="qExit"></span></div>
+        </div>
+
+        <div class="q-list">
+          <div class="head cap cap-rule"><span>Securities</span><span>Value for LTV</span></div>
+          <div id="qSecs"></div>
+          <div class="row"><span>Total security value</span><span class="strong" id="qTotal"></span></div>
+          <div class="row tight" id="qPriorRow"><span>Total prior charges</span><span id="qPrior"></span></div>
+        </div>
+
+        <div class="q-list">
+          <div class="row total"><span>Gross loan</span><span id="qGross"></span></div>
+          <div class="row hair"><span id="qArrLabel"></span><span id="qArr"></span></div>
+          <div class="row hair" id="qBrkRow"><span id="qBrkLabel"></span><span id="qBrk"></span></div>
+          <div class="row hair"><span id="qIntLabel"></span><span id="qInt"></span></div>
+          <div class="row rule"><span>Less loan setup fee</span><span id="qSetup"></span></div>
+          <div class="row net"><span>Net advance</span><span id="qNet"></span></div>
+        </div>
+
+        <div class="terms">
+          <span>Interest rate</span><span id="qRate"></span>
+          <span>Term</span><span id="qTerm"></span>
+          <span>Minimum interest period</span><span id="qMinInt"></span>
+          <span>LTV (gross facility plus prior charges)</span><span class="strong" id="qLtv"></span>
+          <span>Application fee (paid upfront, non-refundable, not deducted)</span><span id="qAppFee"></span>
+          <span>Redemption fee</span><span id="qRedemption"></span>
+          <span>Valuation fee</span><span id="qValuation"></span>
+          <span>Lender legal fees</span><span id="qLegal"></span>
+        </div>
+
+        <div class="q-list">
+          <div class="cap cap-rule">Criteria checks</div>
+          <div id="qCriteria"></div>
+        </div>
+
+        <div class="bullets">
+          <div class="cap cap-rule">Documents required</div>
+          <div class="bullets" id="qDocs"></div>
+        </div>
+
+        <p class="disclaimer">Indicative only. This is not an offer of finance or a Decision in Principle. All lending is subject to underwriting, valuation, legal due diligence and CredX credit approval. CredX provides unregulated bridging finance only. CredX Ltd, Company No. 16640225. Registered Office: Suite F16 St George's Business Park, Castle Road, Sittingbourne, Kent ME10 3TB.</p>
+      </article>
+      <div class="actions" data-noprint>
+        <button type="button" class="btn btn-primary" id="printQuote">Download Indicative Quote (PDF)</button>
+        <button type="button" class="btn" id="copySummary" data-label="Copy summary">Copy summary</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 6 PROPOSE -->
+  <section class="block narrow" data-noprint aria-labelledby="h-propose">
+    <div class="sec-head"><span class="n">06</span><h2 id="h-propose">Propose deal to CredX</h2></div>
+    <label class="field">
+      <span class="lbl" id="commentaryLabel">Broker commentary</span>
+      <textarea class="textarea" data-bind="commentary" rows="6" placeholder="Background to the deal, borrower profile, and your case for any flagged criteria."></textarea>
+    </label>
+    <div class="blockers" id="blockers">
+      <span class="k">Before you can submit</span>
+      <div class="bullets" id="blockerList"></div>
+    </div>
+    <div class="actions">
+      <button type="button" class="btn btn-primary btn-lg" id="submitDeal">Submit to CredX</button>
+      <button type="button" class="btn btn-tall" id="copySubmission" data-label="Copy submission">Copy submission</button>
+    </div>
+    <p class="done" id="submitted" role="status">Your email is ready to send. CredX will review the deal and, if suitable, issue a formal DIP.</p>
+    <div class="sendto">
+      <span class="muted">Submissions go to</span>
+      <span class="addr" id="submitEmail"></span>
+      <button type="button" class="btn btn-xs" id="copyEmail" data-label="Copy address">Copy address</button>
+      <span class="full">If your email client does not open, copy the submission and paste it into an email to this address.</span>
+    </div>
+  </section>
+
+  <!-- 7 FORMS -->
+  <section class="block narrow" data-noprint aria-labelledby="h-forms">
+    <div class="sec-head"><span class="n">07</span><h2 id="h-forms">Client forms</h2></div>
+    <div class="form-grid">
+      <div class="form-card">
+        <div><span class="name">CredX Application Form</span><span class="note">PDF</span></div>
+        <a class="dl" id="formApp" download>Download</a>
+      </div>
+      <div class="form-card">
+        <div><span class="name">Statement of Assets and Liabilities</span><span class="note">Word document (DOCX)</span></div>
+        <a class="dl" id="formSal" download>Download</a>
+      </div>
+    </div>
+    <p class="muted" style="margin:0;font-size:14px">Download, have your client complete, and return to <span class="submit-email-text"></span> with the deal reference.</p>
+  </section>
+</main>
+
+<footer class="site-footer" data-noprint>
+  <div class="wrap">
+    <span>CredX Ltd, Suite 013 Regus, Victory Way, Crossways, Dartford, Kent DA2 6QD.</span>
+    <a id="footerEmail"></a>
+  </div>
+</footer>
+</div>
+
+<div class="sr-only" aria-live="polite" id="announce"></div>
+
+<script src="js/config.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

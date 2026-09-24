@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>CredX calc tests</title>
+<style>body{font:14px/1.5 "Segoe UI",sans-serif;margin:24px}.pass{color:#2e7d32}.fail{color:#C62828;font-weight:600}</style>
+</head>
+<body>
+<h1 id="summary">Running…</h1>
+<ul id="results"></ul>
+<script src="../js/config.js"></script>
+<script src="../js/calc.js"></script>
+<script>
+(function () {
+  var C = window.CREDX_CONFIG, X = window.CredXCalc, results = [];
+  function test(name, fn) { try { fn(); results.push([true, name]); } catch (e) { results.push([false, name + ': ' + e.message]); } }
+  function eq(a, b, what) { if (a !== b) throw new Error((what || 'value') + ' expected ' + JSON.stringify(b) + ', got ' + JSON.stringify(a)); }
+  function deal(patch, secPatch) {
+    var d = X.blankDeal(C);
+    d.broker = { name: 'A', firm: 'B', email: 'c@d.e', phone: '1', fca: '' };
+    d.borrower = { name: 'Borrower Ltd', type: 'SPV', purpose: 'Refinance', exitType: 'Sale', exitDetail: 'Sell in 9 months', occupancy: true, works: false };
+    d.secs[0] = Object.assign(d.secs[0], { address: '1 High St', mv: '400,000.00' }, secPatch || {});
+    return Object.assign(d, patch || {});
+  }
+
+  test('spec case: net £200,000, 12 months, broker fee on, £400,000 security', function () {
+    var k = X.calc(deal({ net: '200,000.00' }), C);
+    eq(X.gbp(k.gross), '£245,725.61', 'gross'); eq(X.pct(k.ltv), '61.43%', 'LTV'); eq(X.gbp(k.net), '£200,000.00', 'net');
+  });
+  test('spec case at 6 months', function () {
+    eq(X.gbp(X.calc(deal({ net: '200,000.00', term: 6 }), C).gross), '£225,134.08');
+  });
+  test('fees add back to gross', function () {
+    var k = X.calc(deal({ net: '123,456.78' }), C);
+    eq(X.r2(k.arr + k.brk + k.int + k.setup + k.net), k.gross);
+  });
+  test('broker fee off removes broker deduction', function () {
+    var k = X.calc(deal({ net: '200,000.00', brokerOn: false }), C);
+    eq(k.brk, 0, 'broker fee'); eq(X.gbp(k.gross), X.gbp((200000 + 1495) / 0.83), 'gross');
+  });
+  test('purchase uses lower of purchase price and market value', function () {
+    var d = deal({ net: '200,000.00' }, { pp: '350,000.00' }); d.borrower.purpose = 'Purchase';
+    var k = X.calc(d, C);
+    eq(k.totalValue, 350000); eq(k.secs[0].basis, 'purchase price');
+  });
+  test('purchase price ignored when purpose is not Purchase', function () {
+    eq(X.calc(deal({ net: '1' }, { pp: '100,000.00' }), C).totalValue, 400000);
+  });
+  test('2nd charge adds prior balance to LTV', function () {
+    var k = X.calc(deal({ net: '200,000.00' }, { charge: '2nd', firstBalance: '30,000.00' }), C);
+    eq(X.pct(k.ltv), X.pct((k.gross + 30000) / 400000));
+  });
+  test('maximise loan hits 70% LTV', function () {
+    var k = X.calc(deal({ net: '1' }), C);
+    eq(k.maxNet, 228105, 'max net');
+    var k2 = X.calc(deal({ net: X.plain(k.maxNet) }), C);
+    eq(k2.ltv <= C.maxLTV + 1e-9, true, 'within 70%');
+  });
+  test('LTV bands: pass, amber (refer), flag', function () {
+    eq(X.ltvLevel(0.70, C), 'pass'); eq(X.ltvLevel(0.72, C), 'amber'); eq(X.ltvLevel(0.76, C), 'flag');
+  });
+  test('LTV above 75% blocks submission', function () {
+    var d = deal({ net: '300,000.00', commentary: 'case' });
+    eq(X.blockers(X.calc(d, C), d).some(function (b) { return /75% maximum/.test(b); }), true);
+  });
+  test('complete deal has no blockers', function () {
+    var d = deal({ net: '200,000.00' });
+    eq(X.blockers(X.calc(d, C), d).length, 0);
+  });
+  test('flagged criteria require commentary', function () {
+    var d = deal({ net: '200,000.00' }); d.borrower.works = true;
+    eq(X.blockers(X.calc(d, C), d).some(function (b) { return /commentary/.test(b); }), true);
+  });
+  test('documents follow property types', function () {
+    var d = deal({}, { type: 'Mixed use' }), docs = X.docs(X.calc(d, C)).join('|');
+    eq(/EPC/.test(docs) && /asbestos/.test(docs), true);
+    d = deal({}, { type: 'Land' }); docs = X.docs(X.calc(d, C)).join('|');
+    eq(/EPC|asbestos/.test(docs), false);
+  });
+  test('reference format CDX-IQ-YYMMDD-XXXX', function () {
+    eq(/^CDX-IQ-\d{6}-[A-HJ-NP-Z2-9]{4}$/.test(X.makeRef()), true);
+  });
+
+  var failed = results.filter(function (r) { return !r[0]; }).length;
+  document.getElementById('results').innerHTML = results.map(function (r) { return '<li class="' + (r[0] ? 'pass' : 'fail') + '">' + (r[0] ? 'PASS ' : 'FAIL ') + r[1].replace(/</g, '&lt;') + '</li>'; }).join('');
+  document.getElementById('summary').textContent = failed ? failed + ' of ' + results.length + ' failed' : 'All ' + results.length + ' passed';
+})();
+</script>
+</body>
+</html>
