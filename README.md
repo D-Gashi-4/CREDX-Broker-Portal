@@ -4,6 +4,10 @@ A static web page for brokers. They structure a bridging deal, see a live Indica
 
 It needs no build step or server. Open `index.html` in a browser, or host the folder on any static host.
 
+## Hosting
+
+The portal is hosted on Vercel (project `credx-broker-portal`), which is linked to this repo. Every push to `main` redeploys it automatically. It needs no build settings.
+
 ## Files
 
 - `js/config.js`: all pricing and settings (rate, fees, LTV limits, loan size limits, terms, submission email, form links). This is the only file to edit for pricing changes.
