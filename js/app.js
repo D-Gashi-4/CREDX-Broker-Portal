@@ -142,7 +142,11 @@
     var seg = btn.parentElement, action = btn.dataset.action;
     if (action === 'clear') resetTo(X.blankDeal(C));
     else if (action === 'example') resetTo(X.exampleDeal(C));
-    else if (action === 'guide') { state.showGuide = !state.showGuide; saveGuide(); render(); }
+    else if (action === 'guide') {
+      state.showGuide = !state.showGuide; saveGuide(); render();
+      // Keep keyboard focus on the matching control after the swap.
+      if (btn.offsetParent === null) (state.showGuide ? document.querySelector('#guide [data-action="guide"]') : document.querySelector('#guideClosed button')).focus();
+    }
     else if (seg && seg.dataset.seg) {
       var key = seg.dataset.seg, v = segValue(key, btn.dataset.value);
       upd(function () { assignPath(SEG_PATH[key], v); });
@@ -225,7 +229,7 @@
 
     show('exampleTag', s.isExample); show('loadExampleTop', !s.isExample);
     show('exampleBanner', s.isExample); show('plainBanner', !s.isExample);
-    show('guide', s.showGuide);
+    show('guide', s.showGuide); show('guideClosed', !s.showGuide);
     text('guideToggle', s.showGuide ? 'Hide guide' : 'How to use');
     $('guideToggle').setAttribute('aria-expanded', String(s.showGuide));
     show('auctionRow', k.isPurchase);
