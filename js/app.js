@@ -4,6 +4,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var DASH = '-';
   var BROKER_KEY = 'credx.broker';
+  var GUIDE_KEY = 'credx.guideHidden';
 
   var OPTIONS = {
     btype: ['Individual', 'UK Limited Company', 'SPV', 'Other'],
@@ -12,6 +13,7 @@
     term: C.terms.map(function (t) { return { value: t.months, label: t.months + ' months' }; }),
     type: ['Residential', 'Commercial', 'Mixed use', 'Land'],
     tenure: ['Freehold', 'Leasehold'],
+    tenanted: ['Yes', 'No'],
     charge: [{ value: '1st', label: '1st charge' }, { value: '2nd', label: '2nd charge' }],
   };
   var SEG_PATH = { btype: 'borrower.type', purpose: 'borrower.purpose', exit: 'borrower.exitType', term: 'term' };
@@ -22,7 +24,10 @@
   }
   function saveBroker() { try { localStorage.setItem(BROKER_KEY, JSON.stringify(state.broker)); } catch (e) { /* storage unavailable */ } }
 
-  var state = Object.assign({ broker: loadBroker(), copied: '' }, X.exampleDeal(C));
+  function guideHidden() { try { return localStorage.getItem(GUIDE_KEY) === '1'; } catch (e) { return false; } }
+  function saveGuide() { try { localStorage.setItem(GUIDE_KEY, state.showGuide ? '0' : '1'); } catch (e) { /* storage unavailable */ } }
+
+  var state = Object.assign({ broker: loadBroker(), copied: '', showGuide: !guideHidden() }, X.exampleDeal(C));
   var copyTimer = null;
 
   // ----- state helpers -----
@@ -65,13 +70,14 @@
   function buildSecs(k) {
     var list = $('secList'), many = state.secs.length > 1;
     list.innerHTML = state.secs.map(function (x, i) {
-      return '<div class="sec-card" data-id="' + x.id + '" role="group" aria-label="Security ' + (i + 1) + '">' +
+      return '<div class="sec-card card" data-id="' + x.id + '" role="group" aria-label="Security ' + (i + 1) + '">' +
         '<div class="top"><span>Security ' + (i + 1) + '</span>' +
           (many ? '<button type="button" class="btn btn-xs" data-remove>Remove</button>' : '') + '</div>' +
         '<div class="fields sm">' + textField('Address', 'address', x.address, 'full') + textField('Postcode', 'postcode', x.postcode) + '</div>' +
         '<div class="field"><span class="lbl">Property type</span><div class="seg" data-secseg="type"></div></div>' +
         '<div class="seg-row">' +
           '<div class="field"><span class="lbl">Tenure</span><div class="seg" data-secseg="tenure"></div></div>' +
+          '<div class="field"><span class="lbl">Tenanted</span><div class="seg" data-secseg="tenanted"></div></div>' +
           '<div class="field"><span class="lbl">Charge position</span><div class="seg" data-secseg="charge"></div></div>' +
         '</div>' +
         '<div class="fields sm">' + moneyField('Market value', 'mv', x.mv) + (k.isPurchase ? moneyField('Purchase price', 'pp', x.pp) : '') + '</div>' +
@@ -87,7 +93,7 @@
     var basis = 'Value used for LTV ' + (k.isPurchase ? '(lower of purchase price and market value)' : '(market value)');
     k.secs.forEach(function (x) {
       var card = $('secList').querySelector('[data-id="' + x.id + '"]');
-      ['type', 'tenure', 'charge'].forEach(function (key) { renderSeg(card.querySelector('[data-secseg="' + key + '"]'), OPTIONS[key], x[key]); });
+      ['type', 'tenure', 'tenanted', 'charge'].forEach(function (key) { renderSeg(card.querySelector('[data-secseg="' + key + '"]'), OPTIONS[key], x[key]); });
       card.querySelector('[data-ltvbasis]').textContent = basis;
       card.querySelector('[data-ltvvalue]').textContent = X.gbp(x.ltvValue);
     });
@@ -133,8 +139,11 @@
   document.addEventListener('click', function (e) {
     var btn = e.target.closest('button');
     if (!btn) return;
-    var seg = btn.parentElement;
-    if (seg && seg.dataset.seg) {
+    var seg = btn.parentElement, action = btn.dataset.action;
+    if (action === 'clear') resetTo(X.blankDeal(C));
+    else if (action === 'example') resetTo(X.exampleDeal(C));
+    else if (action === 'guide') { state.showGuide = !state.showGuide; saveGuide(); render(); }
+    else if (seg && seg.dataset.seg) {
       var key = seg.dataset.seg, v = segValue(key, btn.dataset.value);
       upd(function () { assignPath(SEG_PATH[key], v); });
     } else if (seg && seg.dataset.secseg) {
@@ -152,8 +161,6 @@
     Object.assign(state, deal, { copied: '' });
     syncInputs(); render();
   }
-  $('clearDeal').addEventListener('click', function () { resetTo(X.blankDeal(C)); });
-  $('loadExample').addEventListener('click', function () { resetTo(X.exampleDeal(C)); });
   $('addSec').addEventListener('click', function () {
     upd(function () { state.secs.push(X.blankSec(state.nextId)); state.nextId += 1; });
     var cards = $('secList').querySelectorAll('[data-id]');
@@ -208,12 +215,20 @@
   function bullets(el, items) {
     el.innerHTML = items.map(function (t) { return '<div class="bullet"><span>' + esc(t) + '</span></div>'; }).join('');
   }
+  function docBullets(el, items) {
+    el.innerHTML = items.map(function (d) { return '<div class="bullet"><span><span>' + esc(d.text) + '</span><small>' + esc(d.why) + '</small></span></div>'; }).join('');
+  }
 
   function render() {
     var s = state, b = s.borrower, k = X.calc(s, C);
     var g = function (v) { return k.hasNet ? X.gbp(v) : DASH; };
 
-    show('exampleTag', s.isExample); show('loadExample', !s.isExample);
+    show('exampleTag', s.isExample); show('loadExampleTop', !s.isExample);
+    show('exampleBanner', s.isExample); show('plainBanner', !s.isExample);
+    show('guide', s.showGuide);
+    text('guideToggle', s.showGuide ? 'Hide guide' : 'How to use');
+    $('guideToggle').setAttribute('aria-expanded', String(s.showGuide));
+    show('auctionRow', k.isPurchase);
     show('worksFlag', b.works);
 
     Object.keys(SEG_PATH).forEach(function (key) {
@@ -262,7 +277,8 @@
       var badge = lvl === 'pass' ? '<span class="badge">Pass</span>' : lvl === 'amber' ? '<span class="badge amber">Refer</span>' : '<span class="badge flag">Flag</span>';
       return '<div class="crit"><span><span>' + esc(c.label) + '</span><small class="' + (lvl === 'pass' ? '' : lvl) + '">' + esc(c.detail) + '</small></span>' + badge + '</div>';
     }).join('');
-    bullets($('qDocs'), X.docs(k));
+    var D = X.docs(k, s);
+    docBullets($('qDocs1'), D.s1); docBullets($('qDocs2'), D.s2);
 
     // Propose
     var anyFlag = crit.some(function (c) { return !c.ok; });
@@ -283,6 +299,7 @@
   document.querySelectorAll('.submit-email-text').forEach(function (el) { el.textContent = C.submitEmail; });
   $('footerEmail').textContent = C.submitEmail; $('footerEmail').href = 'mailto:' + C.submitEmail;
   $('formApp').href = C.forms.application; $('formSal').href = C.forms.sal;
+  document.querySelectorAll('.max-ltv-text').forEach(function (el) { el.textContent = X.whole(C.maxLTV); });
 
   syncInputs();
   render();

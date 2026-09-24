@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CredX Broker Portal</title>
 <link rel="icon" href="assets/credx-logo.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/encode-sans-semi-condensed-600.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="css/portal.css">
 </head>
 <body>
@@ -19,25 +20,54 @@
     </div>
     <div class="header-actions">
       <span class="tag" id="exampleTag">Example deal</span>
-      <button type="button" class="btn btn-sm" id="loadExample">Load example</button>
-      <button type="button" class="btn btn-sm" id="clearDeal">Clear</button>
+      <button type="button" class="btn btn-sm" data-action="example" id="loadExampleTop">Load example deal</button>
+      <button type="button" class="btn btn-sm" data-action="clear">Start new deal</button>
+      <button type="button" class="btn btn-sm" data-action="guide" id="guideToggle" aria-controls="guide">Hide guide</button>
     </div>
   </div>
 </header>
 
 <main class="wrap">
 
-  <div class="intro" data-noprint>
+  <div class="hero" data-noprint>
     <h1>Structure a bridging deal</h1>
     <p>Enter the deal to generate a live Indicative Quote, then submit it to CredX with your commentary. CredX provides unregulated principal bridging finance only.</p>
   </div>
+
+  <div class="banner example" id="exampleBanner" data-noprint>
+    <div class="copy">
+      <span class="k">You are viewing an example deal</span>
+      <span>The form is filled with a sample deal so you can see how the portal works: a £200,000 net refinance over 12 months, secured on one property worth £400,000. Change any figure to watch the Indicative Quote update. When you are ready, start a new deal to clear the example and enter your own.</span>
+    </div>
+    <button type="button" class="btn btn-primary" data-action="clear">Clear example and start my deal</button>
+  </div>
+  <div class="banner plain" id="plainBanner" data-noprint>
+    <span>Not sure where to start? Load the example deal to see a completed quote, then start a new deal when you are ready.</span>
+    <button type="button" class="btn btn-md" data-action="example">Load example deal</button>
+  </div>
+
+  <section class="guide" id="guide" data-noprint aria-labelledby="h-guide">
+    <div class="sec-head">
+      <h2 id="h-guide">How to use the portal</h2>
+      <button type="button" class="btn btn-xxs" data-action="guide">Hide guide</button>
+    </div>
+    <div class="guide-grid">
+      <a href="#step1"><span class="num">01</span><span class="txt"><b>Your details</b><small>Name, firm, email and phone. These go on the submission to CredX.</small></span></a>
+      <a href="#step2"><span class="num">02</span><span class="txt"><b>Borrower</b><small>Type, purpose and exit, with exit detail. Tick the occupancy declaration: CredX only does unregulated lending.</small></span></a>
+      <a href="#step3"><span class="num">03</span><span class="txt"><b>Securities</b><small>Add each property. LTV uses the lower of purchase price and market value. Add first charge details for any 2nd charge.</small></span></a>
+      <a href="#step4"><span class="num">04</span><span class="txt"><b>Structure the deal</b><small>Enter the net advance and term, or press Maximise loan for the most available at <span class="max-ltv-text">70%</span> LTV.</small></span></a>
+      <a href="#step5"><span class="num">05</span><span class="txt"><b>Check the quote</b><small>The Indicative Quote updates as you type. Criteria show Pass, Refer (orange) or Flag (red).</small></span></a>
+      <a href="#step6"><span class="num">06</span><span class="txt"><b>Submit to CredX</b><small>Add commentary (required if anything is outside criteria) and press Submit to open a pre-filled email.</small></span></a>
+      <a href="#step7"><span class="num">07</span><span class="txt"><b>Client forms</b><small>Download the Application Form and Statement of Assets and Liabilities for your client to complete.</small></span></a>
+    </div>
+  </section>
 
   <div class="main-grid">
 
     <div class="col" data-noprint>
 
       <!-- 1 BROKER -->
-      <section class="block" aria-labelledby="h-broker">
+      <section class="block" id="step1" aria-labelledby="h-broker">
         <div class="sec-head"><span class="n">01</span><h2 id="h-broker">Broker details</h2></div>
         <div class="fields">
           <label class="field"><span class="lbl">Name</span><input class="input" data-bind="broker.name" autocomplete="name"></label>
@@ -49,16 +79,20 @@
       </section>
 
       <!-- 2 BORROWER -->
-      <section class="block" aria-labelledby="h-borrower">
+      <section class="block" id="step2" aria-labelledby="h-borrower">
         <div class="sec-head"><span class="n">02</span><h2 id="h-borrower">Borrower</h2></div>
         <label class="field"><span class="lbl">Borrower name</span><input class="input" data-bind="borrower.name"></label>
         <div class="field" role="group" aria-labelledby="l-btype">
           <span class="lbl" id="l-btype">Borrower type</span>
           <div class="seg" data-seg="btype"></div>
         </div>
-        <div class="field" role="group" aria-labelledby="l-purpose">
+        <div class="field">
           <span class="lbl" id="l-purpose">Loan purpose</span>
-          <div class="seg" data-seg="purpose"></div>
+          <div class="seg" data-seg="purpose" role="group" aria-labelledby="l-purpose"></div>
+          <label class="check center spaced" id="auctionRow">
+            <input type="checkbox" data-bind="borrower.auction">
+            <span>Purchase at auction</span>
+          </label>
         </div>
         <div class="field">
           <span class="lbl" id="l-exit">Exit strategy</span>
@@ -82,14 +116,14 @@
       </section>
 
       <!-- 3 SECURITIES -->
-      <section class="block" aria-labelledby="h-secs">
+      <section class="block" id="step3" aria-labelledby="h-secs">
         <div class="sec-head"><span class="n">03</span><h2 id="h-secs">Securities</h2></div>
         <div id="secList" style="display:flex;flex-direction:column;gap:20px"></div>
         <div><button type="button" class="btn" id="addSec">+ Add security</button></div>
       </section>
 
       <!-- 4 STRUCTURE -->
-      <section class="block" aria-labelledby="h-structure">
+      <section class="block" id="step4" aria-labelledby="h-structure">
         <div class="sec-head"><span class="n">04</span><h2 id="h-structure">Structure the deal</h2></div>
         <div class="net-row">
           <label class="field"><span class="lbl">Net advance required</span><span class="money"><span>£</span><input inputmode="decimal" data-bind="net" data-money placeholder="0.00"></span></label>
@@ -115,9 +149,9 @@
     </div>
 
     <!-- 5 INDICATIVE QUOTE -->
-    <section class="block quote-block" aria-labelledby="h-quote">
+    <section class="block quote-block" id="step5" aria-labelledby="h-quote">
       <div class="sec-head" data-noprint><span class="n">05</span><h2 id="h-quote">Indicative Quote</h2><span class="aside">Updates as you type</span></div>
-      <article class="quote">
+      <article class="quote card">
         <div class="q-head">
           <div class="logo">
             <img src="assets/credx-logo.svg" alt="CredX">
@@ -167,9 +201,13 @@
           <div id="qCriteria"></div>
         </div>
 
-        <div class="bullets">
-          <div class="cap cap-rule">Documents required</div>
-          <div class="bullets" id="qDocs"></div>
+        <div class="docs">
+          <div class="head">
+            <span class="cap">Documents</span>
+            <span class="note">Suggested documents. CredX may request further information at its discretion.</span>
+          </div>
+          <div class="stage"><b>Stage 1: needed to review the deal</b><div class="bullets" id="qDocs1"></div></div>
+          <div class="stage"><b>Stage 2: needed before completion</b><div class="bullets" id="qDocs2"></div></div>
         </div>
 
         <p class="disclaimer">Indicative only. This is not an offer of finance or a Decision in Principle. All lending is subject to underwriting, valuation, legal due diligence and CredX credit approval. CredX provides unregulated bridging finance only. CredX Ltd, Company No. 16640225. Registered Office: Suite F16 St George's Business Park, Castle Road, Sittingbourne, Kent ME10 3TB.</p>
@@ -182,7 +220,7 @@
   </div>
 
   <!-- 6 PROPOSE -->
-  <section class="block narrow" data-noprint aria-labelledby="h-propose">
+  <section class="block narrow" id="step6" data-noprint aria-labelledby="h-propose">
     <div class="sec-head"><span class="n">06</span><h2 id="h-propose">Propose deal to CredX</h2></div>
     <label class="field">
       <span class="lbl" id="commentaryLabel">Broker commentary</span>
@@ -206,14 +244,14 @@
   </section>
 
   <!-- 7 FORMS -->
-  <section class="block narrow" data-noprint aria-labelledby="h-forms">
+  <section class="block narrow" id="step7" data-noprint aria-labelledby="h-forms">
     <div class="sec-head"><span class="n">07</span><h2 id="h-forms">Client forms</h2></div>
     <div class="form-grid">
-      <div class="form-card">
+      <div class="form-card card">
         <div><span class="name">CredX Application Form</span><span class="note">PDF</span></div>
         <a class="dl" id="formApp" download>Download</a>
       </div>
-      <div class="form-card">
+      <div class="form-card card">
         <div><span class="name">Statement of Assets and Liabilities</span><span class="note">Word document (DOCX)</span></div>
         <a class="dl" id="formSal" download>Download</a>
       </div>
@@ -229,8 +267,6 @@
   </div>
 </footer>
 </div>
-
-<div class="sr-only" aria-live="polite" id="announce"></div>
 
 <script src="js/config.js"></script>
 <script src="js/calc.js"></script>

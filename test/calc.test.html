@@ -71,11 +71,32 @@
     var d = deal({ net: '200,000.00' }); d.borrower.works = true;
     eq(X.blockers(X.calc(d, C), d).some(function (b) { return /commentary/.test(b); }), true);
   });
+  function docText(d) {
+    var D = X.docs(X.calc(d, C), d), t = function (x) { return x.text; };
+    return { s1: D.s1.map(t).join('|'), s2: D.s2.map(t).join('|') };
+  }
   test('documents follow property types', function () {
-    var d = deal({}, { type: 'Mixed use' }), docs = X.docs(X.calc(d, C)).join('|');
-    eq(/EPC/.test(docs) && /asbestos/.test(docs), true);
-    d = deal({}, { type: 'Land' }); docs = X.docs(X.calc(d, C)).join('|');
-    eq(/EPC|asbestos/.test(docs), false);
+    var docs = docText(deal({}, { type: 'Commercial' }));
+    eq(/Asbestos/.test(docs.s2) && !/EPC/.test(docs.s2), true, 'commercial');
+    docs = docText(deal({}, { type: 'Residential' }));
+    eq(/EPC/.test(docs.s2) && !/Asbestos/.test(docs.s2), true, 'residential');
+    docs = docText(deal({}, { type: 'Land' }));
+    eq(/EPC|Asbestos/.test(docs.s2), false, 'land');
+  });
+  test('documents: auction purchase, tenanted leasehold 2nd charge, company borrower', function () {
+    var d = deal({}, { tenure: 'Leasehold', tenanted: 'Yes', charge: '2nd' });
+    d.borrower.purpose = 'Purchase'; d.borrower.auction = true;
+    var docs = docText(d);
+    eq(/Auction legal pack/.test(docs.s1) && /Memorandum of sale/.test(docs.s1), true, 'auction purchase');
+    eq(/first charge mortgage statement/.test(docs.s1), true, '2nd charge stage 1');
+    eq(/Copy of lease/.test(docs.s2) && /Rent schedule/.test(docs.s2) && /First charge lender consent/.test(docs.s2), true, 'stage 2 security docs');
+    eq(/Certificate of incorporation/.test(docs.s2), true, 'SPV docs');
+    d.borrower.purpose = 'Refinance';
+    eq(/Auction/.test(docText(d).s1), false, 'auction only for purchase');
+  });
+  test('quote text lists both document stages', function () {
+    var d = deal({ net: '200,000.00' }), t = X.quoteText(X.calc(d, C), d, true);
+    eq(/Stage 1: needed to review the deal[\s\S]*\[ \] Completed Application Form \(All deals\)[\s\S]*Stage 2: needed before completion/.test(t), true);
   });
   test('reference format CDX-IQ-YYMMDD-XXXX', function () {
     eq(/^CDX-IQ-\d{6}-[A-HJ-NP-Z2-9]{4}$/.test(X.makeRef()), true);

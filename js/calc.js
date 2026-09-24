@@ -16,10 +16,10 @@
     return 'CDX-IQ-' + String(d.getFullYear()).slice(2) + p(d.getMonth() + 1) + p(d.getDate()) + '-' + x;
   }
 
-  function blankSec(id) { return { id: id, address: '', postcode: '', type: 'Residential', tenure: 'Freehold', mv: '', pp: '', charge: '1st', firstLender: '', firstBalance: '' }; }
+  function blankSec(id) { return { id: id, address: '', postcode: '', type: 'Residential', tenure: 'Freehold', tenanted: 'No', mv: '', pp: '', charge: '1st', firstLender: '', firstBalance: '' }; }
   function blankDeal(C) {
     return {
-      borrower: { name: '', type: '', purpose: '', exitType: '', exitDetail: '', occupancy: false, works: false },
+      borrower: { name: '', type: '', purpose: '', exitType: '', exitDetail: '', occupancy: false, works: false, auction: false },
       secs: [blankSec(1)], nextId: 2, net: '', term: C.defaultTerm, brokerOn: true,
       commentary: '', ref: makeRef(), submitted: false, isExample: false,
     };
@@ -27,7 +27,7 @@
   function exampleDeal(C) {
     var d = blankDeal(C), s = blankSec(1);
     s.address = '1 Example Street, London'; s.postcode = 'SW1A 1AA'; s.mv = '400,000.00';
-    d.borrower = { name: 'Example Holdings Ltd', type: 'UK Limited Company', purpose: 'Refinance', exitType: 'Refinance', exitDetail: 'Refinance onto a buy-to-let term loan within 12 months.', occupancy: true, works: false };
+    d.borrower = { name: 'Example Holdings Ltd', type: 'UK Limited Company', purpose: 'Refinance', exitType: 'Refinance', exitDetail: 'Refinance onto a buy-to-let term loan within 12 months.', occupancy: true, works: false, auction: false };
     d.secs = [s]; d.net = '200,000.00'; d.term = 12; d.brokerOn = true; d.isExample = true;
     return d;
   }
@@ -81,15 +81,27 @@
     ].map(function (c) { if (!c.level) c.level = c.ok ? 'pass' : 'flag'; return c; });
   }
 
-  function docs(k) {
-    var types = new Set(k.secs.map(function (x) { return x.type; }));
-    var res = types.has('Residential') || types.has('Mixed use');
-    var com = types.has('Commercial') || types.has('Mixed use');
-    var d = ['All borrowers: certified photo ID', 'All borrowers: two certified proofs of address dated within the last 3 months', 'All borrowers: Statement of Assets and Liabilities'];
-    if (res) d.push('Residential security: EPC rated E or above', 'Residential security: gas safety certificate');
-    if (com) d.push('Commercial security: fire risk assessment', 'Commercial security: asbestos report');
-    d.push('Valuation: desktop valuation in the first instance, full RICS inspection at CredX discretion, surveyor fee paid by borrower');
-    return d;
+  // Suggested documents in two stages, each item tagged with why it is needed.
+  function docs(k, s) {
+    var b = s.borrower, has = function (f) { return k.secs.some(f); };
+    var s1 = [], s2 = [];
+    var add = function (arr, why, items) { items.forEach(function (t) { arr.push({ text: t, why: why }); }); };
+    add(s1, 'All deals', ['Completed Application Form', 'Statement of Assets and Liabilities', 'Exit strategy detail']);
+    if (b.purpose === 'Purchase') add(s1, 'Purpose: Purchase', ['Memorandum of sale or accepted offer', 'Proof of deposit and its source']);
+    if (b.purpose === 'Purchase' && b.auction) add(s1, 'Purchase at auction', ['Auction legal pack', 'Completion deadline']);
+    if (b.purpose === 'Refinance') add(s1, 'Purpose: Refinance', ['Redemption statement from the existing lender']);
+    if (has(function (x) { return x.charge === '2nd'; })) add(s1, '2nd charge security', ['Latest first charge mortgage statement']);
+    if (b.exitType === 'Refinance') add(s1, 'Exit: Refinance', ['Exit lender AIP or broker outline of the refinance']);
+    if (b.exitType === 'Sale') add(s1, 'Exit: Sale', ['Agent marketing appraisal or comparable sales']);
+    add(s2, 'All individuals, directors and 25%+ shareholders', ['Certified photo ID', 'Two certified proofs of address dated within 3 months']);
+    if (b.type === 'UK Limited Company' || b.type === 'SPV') add(s2, 'Borrower: ' + b.type, ['Certificate of incorporation', 'Shareholder structure chart', 'Latest accounts or management accounts', 'Personal guarantees from directors']);
+    if (has(function (x) { return x.type === 'Residential'; })) add(s2, 'Residential security', ['EPC rated E or above', 'Gas safety certificate']);
+    if (has(function (x) { return x.type === 'Commercial' || x.type === 'Mixed use'; })) add(s2, 'Commercial or mixed use security', ['Fire risk assessment', 'Asbestos report']);
+    if (has(function (x) { return x.tenure === 'Leasehold'; })) add(s2, 'Leasehold security', ['Copy of lease showing remaining term']);
+    if (has(function (x) { return x.tenanted === 'Yes'; })) add(s2, 'Tenanted security', ['Tenancy agreement or lease', 'Rent schedule']);
+    if (has(function (x) { return x.charge === '2nd'; })) add(s2, '2nd charge security', ['First charge lender consent (CredX solicitors will request)']);
+    add(s2, 'Valuation', ['Desktop in the first instance, full RICS inspection at CredX discretion, surveyor fee paid by borrower']);
+    return { s1: s1, s2: s2 };
   }
 
   function blockers(k, s) {
@@ -138,7 +150,11 @@
     criteria(k, s).forEach(function (c) {
       L.push('- ' + c.label + ': ' + (c.ok ? 'Pass' : c.level === 'amber' ? 'Refer, OUTSIDE STANDARD CRITERIA' : 'Flag, OUTSIDE STANDARD CRITERIA') + ' (' + c.detail + ')');
     });
-    L.push('', 'DOCUMENTS REQUIRED'); docs(k).forEach(function (d) { L.push('- ' + d); });
+    var D = docs(k, s), item = function (d) { L.push('[ ] ' + d.text + ' (' + d.why + ')'); };
+    L.push('', 'DOCUMENTS', 'Suggested documents. CredX may request further information at its discretion.', '', 'Stage 1: needed to review the deal');
+    D.s1.forEach(item);
+    L.push('', 'Stage 2: needed before completion');
+    D.s2.forEach(item);
     if (full) L.push('', 'BROKER COMMENTARY', s.commentary.trim() || 'None provided');
     L.push('', 'Indicative only. This is not an offer of finance or a Decision in Principle. All lending is subject to underwriting, valuation, legal due diligence and CredX credit approval. CredX provides unregulated bridging finance only. CredX Ltd, Company No. 16640225.');
     return L.join('\n');
